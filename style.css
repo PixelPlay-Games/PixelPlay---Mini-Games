@@ -226,3 +226,80 @@ body {
 .live-score { background: var(--surface); padding: 6px 12px; border-radius: 10px; font-size: 13px; color: var(--muted); }
 .live-score b { color: var(--cyan); }
 #game-container { flex: 1; background: #080a12; border-radius: 18px; border: 1px solid rgba(255, 255, 255, 0.08); overflow: hidden; position: relative; }
+/* === ЖИВЫЕ АНИМАЦИИ И ЭФФЕКТЫ === */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: 
+    radial-gradient(circle at 15% 20%, rgba(0, 240, 255, 0.12) 0%, transparent 45%),
+    radial-gradient(circle at 85% 75%, rgba(255, 0, 127, 0.12) 0%, transparent 45%);
+  pointer-events: none;
+  z-index: -1;
+  animation: ambientPulse 6s ease-in-out infinite alternate;
+}
+
+@keyframes ambientPulse {
+  0% { opacity: 0.6; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.08); }
+}
+
+.hero-card {
+  position: relative;
+  overflow: hidden;
+  animation: borderGlow 3s infinite alternate;
+}
+
+@keyframes borderGlow {
+  0% { box-shadow: 0 8px 20px rgba(255, 0, 127, 0.15); border-color: rgba(255, 0, 127, 0.35); }
+  100% { box-shadow: 0 8px 28px rgba(0, 240, 255, 0.25); border-color: rgba(0, 240, 255, 0.5); }
+}
+
+.btn-glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-glow::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 40%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.35);
+  transform: rotate(25deg);
+  animation: btnShine 3.5s infinite;
+}
+
+@keyframes btnShine {
+  0%, 70% { left: -60%; }
+  100% { left: 140%; }
+}
+
+.game-card.featured {
+  background: linear-gradient(160deg, #161b30 0%, #0f1322 100%);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+.game-card.featured .card-art {
+  animation: iconFloat 3s ease-in-out infinite;
+}
+
+.game-card.featured:nth-child(2) .card-art {
+  animation-delay: 1.5s;
+}
+
+@keyframes iconFloat {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-5px) scale(1.05); }
+}
+
+.play-circle {
+  box-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+  transition: transform 0.2s;
+}
+
+.game-card.featured:active .play-circle {
+  transform: scale(1.25);
+}
