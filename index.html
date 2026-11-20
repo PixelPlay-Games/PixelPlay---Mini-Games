@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>PixelPlay — Mini Games</title>
+  <script src="https://telegram.org"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="toast" class="toast hidden"></div>
+
+  <header class="top-bar">
+    <div class="user-profile">
+      <div class="avatar-ring">
+        <div class="avatar" id="user-avatar">👾</div>
+      </div>
+      <div class="user-details">
+        <div class="name-row">
+          <span class="username" id="user-name">Игрок</span>
+          <span class="lvl-badge" id="user-lvl">LVL 1</span>
+        </div>
+        <div class="xp-bar">
+          <div class="xp-fill" id="xp-fill" style="width: 20%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <button class="wallet-pill" id="header-shop-btn">
+      <span>💎</span>
+      <span id="user-gems">100</span>
+      <span class="add-circle">+</span>
+    </button>
+  </header>
+  <main id="tab-games" class="tab-view active">
+    <div class="hero-card">
+      <div class="hero-text">
+        <span class="tag-pill">🔥 Ежедневный бонус</span>
+        <h2>Забери кристаллы</h2>
+        <p>Заходи каждый день и копи на бустеры</p>
+      </div>
+      <button class="btn-glow" id="claim-daily-btn">+50 💎</button>
+    </div>
+
+    <div class="section-header">
+      <h3>Аркадный зал</h3>
+      <span class="online-indicator"><i class="dot"></i> 2 игры доступно</span>
+    </div>
+
+    <div class="games-grid">
+      <div class="game-card featured" data-game="neon-drop" data-title="Neon Merge">
+        <div class="badge-hot">ХИТ</div>
+        <div class="card-art cyan-bg">🔮</div>
+        <h4>Neon Merge</h4>
+        <p>Физика и слияние</p>
+        <div class="card-footer">
+          <span class="reward-hint">До +50 💎</span>
+          <span class="play-circle">▶</span>
+        </div>
+      </div>
+
+      <div class="game-card featured" data-game="color-sort" data-title="Neon Flasks">
+        <div class="badge-new">NEW</div>
+        <div class="card-art pink-bg">🧪</div>
+        <h4>Neon Flasks</h4>
+        <p>Логика и цвета</p>
+        <div class="card-footer">
+          <span class="reward-hint">До +40 💎</span>
+          <span class="play-circle">▶</span>
+        </div>
+      </div>
+
+      <div class="game-card locked" data-game="cyber-tower">
+        <div class="card-art purple-bg">🗼</div>
+        <h4>Cyber Stack</h4>
+        <p>Башня на реакцию</p>
+        <div class="card-footer"><span class="soon-tag">Скоро</span></div>
+      </div>
+
+      <div class="game-card locked" data-game="pixel-miner">
+        <div class="card-art gold-bg">🔢</div>
+        <h4>Neon 2048</h4>
+        <p>Классика чисел</p>
+        <div class="card-footer"><span class="soon-tag">Скоро</span></div>
+      </div>
+    </div>
+  </main>
+  <section id="tab-tasks" class="tab-view">
+    <div class="invite-banner">
+      <h3>Зови друзей в PixelPlay</h3>
+      <p>Получай <b>+100 💎</b> за каждого друга, который запустит приложение.</p>
+      <button class="btn-glow full" id="invite-friend-btn">Пригласить друга</button>
+    </div>
+
+    <div class="section-header"><h3>Быстрые задания</h3></div>
+
+    <div class="list-stack">
+      <div class="list-item">
+        <div class="item-icon">📢</div>
+        <div class="item-info">
+          <b>Канал новостей PixelPlay</b>
+          <span>Узнавай о новых играх первым</span>
+        </div>
+        <button class="btn-outline" id="sub-task-btn">+50 💎</button>
+      </div>
+
+      <div class="list-item">
+        <div class="item-icon">🎮</div>
+        <div class="item-info">
+          <b>Сыграть первую партию</b>
+          <span>Запусти любую игру из каталога</span>
+        </div>
+        <button class="btn-outline" id="first-play-btn">+30 💎</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-shop" class="tab-view">
+    <div class="section-header">
+      <h3>Пополнить баланс</h3>
+      <span class="sub-note">Оплата через Telegram Stars ⭐</span>
+    </div>
+
+    <div class="list-stack">
+      <div class="list-item shop-card">
+        <div class="item-icon">💎</div>
+        <div class="item-info">
+          <b>100 Кристаллов</b>
+          <span>Хватит на 5 бустеров в играх</span>
+        </div>
+        <button class="btn-star" data-gems="100" data-stars="10">10 ⭐</button>
+      </div>
+
+      <div class="list-item shop-card popular">
+        <div class="item-icon">💠</div>
+        <div class="item-info">
+          <b>550 Кристаллов <span class="bonus-tag">+10%</span></b>
+          <span>Популярный выбор игроков</span>
+        </div>
+        <button class="btn-star" data-gems="550" data-stars="50">50 ⭐</button>
+      </div>
+
+      <div class="list-item shop-card">
+        <div class="item-icon">👑</div>
+        <div class="item-info">
+          <b>1 250 Кристаллов <span class="bonus-tag">+25%</span></b>
+          <span>Максимальный запас на все игры</span>
+        </div>
+        <button class="btn-star" data-gems="1250" data-stars="100">100 ⭐</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="game-screen" class="game-overlay hidden">
+    <div class="game-top-bar">
+      <button class="icon-back-btn" id="back-to-lobby">← Меню</button>
+      <span class="game-title-header" id="current-game-title">Игра</span>
+      <div class="live-score">Счет: <b id="game-score">0</b></div>
+    </div>
+    <div id="game-container"></div>
+  </section>
+
+  <nav class="bottom-nav">
+    <button class="nav-tab active" data-target="tab-games">🎮<span>Игры</span></button>
+    <button class="nav-tab" data-target="tab-tasks">🎁<span>Бонусы</span></button>
+    <button class="nav-tab" data-target="tab-shop">⭐<span>Магазин</span></button>
+  </nav>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
