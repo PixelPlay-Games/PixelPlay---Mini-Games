@@ -272,10 +272,10 @@ document.querySelectorAll('.game-card').forEach(card => {
           showToast(`+${reward} 💎 за отличный результат!`);
         }
       });
-    } catch (err) {
-      console.error(err);
-      showToast('Не удалось загрузить игру');
+       } catch (err) {
+      alert('Ошибка: ' + (err?.message || err));
     }
+
   });
 });
 
