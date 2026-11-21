@@ -5,41 +5,41 @@ export function startGame(container, api) {
   container.innerHTML = `
     <div style="height:40px; display:flex; align-items:center; justify-content:space-between; padding:0 14px; background:rgba(10,25,22,0.95); border-bottom:1px solid rgba(0,255,170,0.2); font-size:12px;">
       <span style="color:#80cbc4;">🏆 Рекорд: <b id="q2048-best" style="color:#ffd700;">${bestScore}</b></span>
-      <span style="color:#80cbc4;">💠 Макс. ядро: <b id="q2048-max" style="color:#00ffaa;">${maxTile}</b></span>
+      <span style="color:#80cbc4;">💠 Макс: <b id="q2048-max" style="color:#00ffaa;">${maxTile}</b></span>
     </div>
     <canvas id="canvas-2048" style="display:block; width:100%; height:calc(100% - 96px); touch-action:none;"></canvas>
     <div style="height:56px; display:flex; align-items:center; justify-content:space-between; gap:6px; padding:0 10px; background:#0b1a17; border-top:1px solid rgba(0,255,170,0.15);">
-      <button id="q-undo" style="background:rgba(0,255,170,0.15); border:1px solid #00ffaa; color:#fff; padding:7px 8px; border-radius:10px; font-size:10.5px; font-weight:700; cursor:pointer;">↩ Шаг (10 💎)</button>
-      <button id="q-smash" style="background:rgba(255,82,82,0.2); border:1px solid #ff5252; color:#fff; padding:7px 8px; border-radius:10px; font-size:10.5px; font-weight:700; cursor:pointer;">💥 Убрать 2/4 (25 💎)</button>
-      <button id="q-upgrade" style="background:rgba(255,215,0,0.2); border:1px solid #ffd700; color:#fff; padding:7px 8px; border-radius:10px; font-size:10.5px; font-weight:700; cursor:pointer;">⚡ Апгрейд (40 💎)</button>
-      <button id="q-reset" style="background:rgba(255,255,255,0.08); border:none; color:#80cbc4; padding:7px 9px; border-radius:10px; font-size:12px; font-weight:700; cursor:pointer;">↻</button>
+      <button id="q-undo" style="background:rgba(0,255,170,0.15); border:1px solid #00ffaa; color:#fff; padding:7px 8px; border-radius:10px; font-size:10.5px; font-weight:700;">↩ Шаг (10 💎)</button>
+      <button id="q-smash" style="background:rgba(255,82,82,0.2); border:1px solid #ff5252; color:#fff; padding:7px 8px; border-radius:10px; font-size:10.5px; font-weight:700;">💥 -2/4 (25 💎)</button>
+      <button id="q-upgrade" style="background:rgba(255,215,0,0.2); border:1px solid #ffd700; color:#fff; padding:7px 8px; border-radius:10px; font-size:10.5px; font-weight:700;">⚡ x2 (40 💎)</button>
+      <button id="q-reset" style="background:rgba(255,255,255,0.08); border:none; color:#80cbc4; padding:7px 9px; border-radius:10px; font-size:12px; font-weight:700;">↻</button>
     </div>
   `;
 
   const canvas = document.getElementById('canvas-2048');
   const ctx = canvas.getContext('2d');
-  const width = canvas.width = container.clientWidth;
-  const height = canvas.height = container.clientHeight - 96;
+  const width = canvas.width = container.clientWidth || 340;
+  const height = canvas.height = (container.clientHeight || 480) - 96;
 
-  const CORES = {
-    2: { c1: '#26a69a', c2: '#004d40', text: '#e0f2f1' },
-    4: { c1: '#00e676', c2: '#00695c', text: '#ffffff' },
-    8: { c1: '#00e5ff', c2: '#006064', text: '#ffffff' },
-    16: { c1: '#2979ff', c2: '#0d47a1', text: '#ffffff' },
-    32: { c1: '#d500f9', c2: '#4a148c', text: '#ffffff' },
-    64: { c1: '#ff1744', c2: '#880e4f', text: '#ffffff' },
-    128: { c1: '#ff9100', c2: '#e65100', text: '#ffffff' },
-    256: { c1: '#ffd600', c2: '#ff6f00', text: '#1a1a1a' },
-    512: { c1: '#76ff03', c2: '#33691e', text: '#1a1a1a' },
-    1024: { c1: '#f50057', c2: '#311b92', text: '#ffffff' },
-    2048: { c1: '#ffffff', c2: '#ffd700', text: '#000000' }
-  };
+  function getCoreStyle(v) {
+    if (v === 2) return { c1: '#26a69a', c2: '#004d40', text: '#e0f2f1' };
+    if (v === 4) return { c1: '#00e676', c2: '#00695c', text: '#ffffff' };
+    if (v === 8) return { c1: '#00e5ff', c2: '#006064', text: '#ffffff' };
+    if (v === 16) return { c1: '#2979ff', c2: '#0d47a1', text: '#ffffff' };
+    if (v === 32) return { c1: '#d500f9', c2: '#4a148c', text: '#ffffff' };
+    if (v === 64) return { c1: '#ff1744', c2: '#880e4f', text: '#ffffff' };
+    if (v === 128) return { c1: '#ff9100', c2: '#e65100', text: '#ffffff' };
+    if (v === 256) return { c1: '#ffd600', c2: '#ff6f00', text: '#1a1a1a' };
+    if (v === 512) return { c1: '#76ff03', c2: '#33691e', text: '#1a1a1a' };
+    if (v === 1024) return { c1: '#f50057', c2: '#311b92', text: '#ffffff' };
+    return { c1: '#ffffff', c2: '#ffd700', text: '#000000' };
+  }
 
   let grid = Array.from({ length: 4 }, () => Array(4).fill(0));
   let prevGrid = null, score = 0, prevScore = 0, gameOver = false;
   let particles = [], animScales = {}, animId;
 
-  const boardSize = Math.min(width - 28, height - 40, 330);
+  const boardSize = Math.min(width - 28, height - 30, 330);
   const startX = (width - boardSize) / 2;
   const startY = (height - boardSize) / 2;
   const gap = 10;
@@ -48,9 +48,9 @@ export function startGame(container, api) {
   function spawnBurst(r, c, color) {
     const cx = startX + gap + c * (cellSize + gap) + cellSize / 2;
     const cy = startY + gap + r * (cellSize + gap) + cellSize / 2;
-    for (let i = 0; i < 16; i++) {
-      const a = (Math.PI * 2 * i) / 16;
-      const spd = 2 + Math.random() * 3.5;
+    for (let i = 0; i < 14; i++) {
+      const a = (Math.PI * 2 * i) / 14;
+      const spd = 2 + Math.random() * 3;
       particles.push({ x: cx, y: cy, vx: Math.cos(a) * spd, vy: Math.sin(a) * spd, life: 1, color });
     }
   }
@@ -99,9 +99,8 @@ export function startGame(container, api) {
       const realIdx = isRev ? 3 - idx : idx;
       const r = isVert ? realIdx : lineIdx;
       const c = isVert ? lineIdx : realIdx;
-      animScales[`${r}-${c}`] = 1.32;
-      const core = CORES[grid[r][c]] || CORES[2048];
-      spawnBurst(r, c, core.c1);
+      animScales[`${r}-${c}`] = 1.3;
+      spawnBurst(r, c, getCoreStyle(grid[r][c]).c1);
     });
     return arr;
   }
@@ -126,10 +125,8 @@ export function startGame(container, api) {
     }
 
     if (moved) {
-      prevGrid = snap;
-      prevScore = scoreSnap;
-      addTile();
-      api.onScore(score);
+      prevGrid = snap; prevScore = scoreSnap;
+      addTile(); api.onScore(score);
       if (score > bestScore) {
         bestScore = score;
         localStorage.setItem('q2048_best', String(bestScore));
@@ -150,68 +147,45 @@ export function startGame(container, api) {
       }
     }
     gameOver = true;
-    window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred('error');
   }
-
   let startX = 0, startY = 0;
-  canvas.addEventListener('pointerdown', (e) => {
-    startX = e.clientX;
-    startY = e.clientY;
-  });
+  canvas.addEventListener('pointerdown', (e) => { startX = e.clientX; startY = e.clientY; });
   canvas.addEventListener('pointerup', (e) => {
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
-    if (Math.max(Math.abs(dx), Math.abs(dy)) < 22) return;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 20) return;
     if (Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? 'RIGHT' : 'LEFT');
     else move(dy > 0 ? 'DOWN' : 'UP');
   });
 
   document.getElementById('q-undo').onclick = () => {
     if (prevGrid && !gameOver && api.spendGems(10)) {
-      grid = JSON.parse(prevGrid);
-      score = prevScore;
-      prevGrid = null;
-      api.onScore(score);
+      grid = JSON.parse(prevGrid); score = prevScore; prevGrid = null; api.onScore(score);
     }
   };
-
   document.getElementById('q-smash').onclick = () => {
     if (!gameOver && api.spendGems(25)) {
       let cleared = false;
       for (let r = 0; r < 4; r++) {
         for (let c = 0; c < 4; c++) {
-          if (grid[r][c] === 2 || grid[r][c] === 4) {
-            spawnBurst(r, c, '#ff5252');
-            grid[r][c] = 0;
-            cleared = true;
-          }
+          if (grid[r][c] === 2 || grid[r][c] === 4) { spawnBurst(r, c, '#ff5252'); grid[r][c] = 0; cleared = true; }
         }
       }
       if (!cleared) addTile();
-      window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('heavy');
     }
   };
-
   document.getElementById('q-upgrade').onclick = () => {
     if (!gameOver && api.spendGems(40)) {
       let maxV = 0, mr = 0, mc = 0;
       for (let r = 0; r < 4; r++) {
-        for (let c = 0; c < 4; c++) {
-          if (grid[r][c] > maxV) { maxV = grid[r][c]; mr = r; mc = c; }
-        }
+        for (let c = 0; c < 4; c++) if (grid[r][c] > maxV) { maxV = grid[r][c]; mr = r; mc = c; }
       }
-      if (maxV > 0) {
-        grid[mr][mc] *= 2;
-        animScales[`${mr}-${mc}`] = 1.4;
-        spawnBurst(mr, mc, '#ffd700');
-        window.Telegram?.WebApp?.HapticFeedback?.notificationOccurred('success');
-      }
+      if (maxV > 0) { grid[mr][mc] *= 2; animScales[`${mr}-${mc}`] = 1.4; spawnBurst(mr, mc, '#ffd700'); }
     }
   };
-
   document.getElementById('q-reset').onclick = () => init();
 
-  function roundRect(x, y, w, h, r) {
+  function drawBox(x, y, w, h, r) {
     ctx.beginPath();
     ctx.moveTo(x + r, y);
     ctx.arcTo(x + w, y, x + w, y + h, r);
@@ -222,25 +196,21 @@ export function startGame(container, api) {
   }
 
   function loop() {
-    const bgGrad = ctx.createRadialGradient(width / 2, height * 0.3, 10, width / 2, height / 2, height * 0.8);
-    bgGrad.addColorStop(0, '#102e28');
-    bgGrad.addColorStop(1, '#060f0d');
-    ctx.fillStyle = bgGrad;
+    ctx.fillStyle = '#071411';
     ctx.fillRect(0, 0, width, height);
 
     ctx.fillStyle = 'rgba(0, 255, 170, 0.06)';
     ctx.strokeStyle = 'rgba(0, 255, 170, 0.3)';
     ctx.lineWidth = 2;
-    roundRect(startX, startY, boardSize, boardSize, 18);
-    ctx.fill();
-    ctx.stroke();
+    drawBox(startX, startY, boardSize, boardSize, 18);
+    ctx.fill(); ctx.stroke();
 
     for (let r = 0; r < 4; r++) {
       for (let c = 0; c < 4; c++) {
         const x = startX + gap + c * (cellSize + gap);
         const y = startY + gap + r * (cellSize + gap);
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-        roundRect(x, y, cellSize, cellSize, 12);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        drawBox(x, y, cellSize, cellSize, 12);
         ctx.fill();
 
         const val = grid[r][c];
@@ -252,31 +222,21 @@ export function startGame(container, api) {
             if (Math.abs(1 - sc) < 0.01) sc = 1;
             animScales[key] = sc;
           }
-
-          const core = CORES[val] || CORES[2048];
+          const core = getCoreStyle(val);
           ctx.save();
           ctx.translate(x + cellSize / 2, y + cellSize / 2);
           ctx.scale(sc, sc);
-
           const grad = ctx.createLinearGradient(-cellSize / 2, -cellSize / 2, cellSize / 2, cellSize / 2);
-          grad.addColorStop(0, core.c1);
-          grad.addColorStop(1, core.c2);
-
-          ctx.shadowBlur = 14;
-          ctx.shadowColor = core.c1;
+          grad.addColorStop(0, core.c1); grad.addColorStop(1, core.c2);
           ctx.fillStyle = grad;
-          roundRect(-cellSize / 2, -cellSize / 2, cellSize, cellSize, 12);
+          drawBox(-cellSize / 2, -cellSize / 2, cellSize, cellSize, 12);
           ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+          ctx.lineWidth = 1.5; ctx.stroke();
 
-          ctx.strokeStyle = 'rgba(255,255,255,0.5)';
-          ctx.lineWidth = 1.5;
-          ctx.stroke();
-
-          ctx.shadowBlur = 0;
           ctx.fillStyle = core.text;
           ctx.font = `900 ${val >= 1024 ? 18 : val >= 128 ? 22 : 26}px sans-serif`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
+          ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
           ctx.fillText(String(val), 0, 1);
           ctx.restore();
         }
@@ -295,15 +255,11 @@ export function startGame(container, api) {
     if (gameOver) {
       ctx.fillStyle = 'rgba(6, 15, 13, 0.88)';
       ctx.fillRect(0, 0, width, height);
-      ctx.fillStyle = '#00ffaa';
-      ctx.font = 'bold 24px sans-serif';
-      ctx.textAlign = 'center';
+      ctx.fillStyle = '#00ffaa'; ctx.font = 'bold 24px sans-serif'; ctx.textAlign = 'center';
       ctx.fillText('Ходов больше нет!', width / 2, height / 2 - 16);
-      ctx.fillStyle = '#ffd700';
-      ctx.font = 'bold 16px sans-serif';
+      ctx.fillStyle = '#ffd700'; ctx.font = 'bold 16px sans-serif';
       ctx.fillText(`Счет: ${score} | Рекорд: ${bestScore}`, width / 2, height / 2 + 14);
     }
-
     animId = requestAnimationFrame(loop);
   }
 
