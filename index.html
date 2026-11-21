@@ -26,9 +26,8 @@
       justify-content: space-between; height: 160px; cursor: pointer; transition: transform 0.2s;
     }
     .card:active { transform: scale(0.95); }
-    .card-blue   { background: linear-gradient(135deg, #2563eb, #1e3a8a); box-shadow: 0 8px 24px rgba(    .card-purple { background: linear-gradient(135deg, #7c3aed, #3b0764); box-shadow: 0 8px 24px rgba(    .card-purple { background: linear-gradient(135deg, #7c3aed, #3b0764); box-shadow: 0 8px 24px rgba(124,58,237,0.35); }
+    .card-blue   { background: linear-gradient(135deg, #2563eb, #1e3a8a); box-shadow: 0 8px 24px rgba(37,99,235,0.35); }
     .card-purple { background: linear-gradient(135deg, #7c3aed, #3b0764); box-shadow: 0 8px 24px rgba(124,58,237,0.35); }
-
     .card-green  { background: linear-gradient(135deg, #059669, #064e3b); opacity: 0.6; }
     .card-red    { background: linear-gradient(135deg, #e11d48, #881337); opacity: 0.6; }
     .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
@@ -60,7 +59,7 @@
   <div class="section-title">Мини-игры</div>
 
   <div class="grid">
-    <div class="card card-blue" onclick="location.href='games/2048.html'">
+    <div class="card card-blue" onclick="location.href='game/2048.html'">
       <div class="card-top">
         <div class="icon-box">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
@@ -73,7 +72,7 @@
       </div>
     </div>
 
-      <div class="card card-purple" onclick="location.href='game/blocks.html'">
+    <div class="card card-purple" onclick="location.href='game/blocks.html'">
       <div class="card-top">
         <div class="icon-box">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>
@@ -83,11 +82,6 @@
       <div>
         <div class="card-title">Block Blast</div>
         <div class="card-sub" id="best-blocks">Рекорд: 0</div>
-      </div>
-    </div>
-
-        <div class="card-title">Игра 2</div>
-        <div class="card-sub">В разработке</div>
       </div>
     </div>
 
@@ -133,13 +127,12 @@
     </a>
   </div>
 
-    <script>
+  <script>
     const best2048 = Number(localStorage.getItem('pixelplay_2048_best')) || 0;
     const bestBlocks = Number(localStorage.getItem('pixelplay_blocks_best')) || 0;
     document.getElementById('best-2048').textContent = 'Рекорд: ' + best2048;
     document.getElementById('best-blocks').textContent = 'Рекорд: ' + bestBlocks;
     document.getElementById('total-best').textContent = best2048 + bestBlocks;
   </script>
-
 </body>
 </html>
