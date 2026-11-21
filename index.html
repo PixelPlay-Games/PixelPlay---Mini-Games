@@ -177,12 +177,14 @@
   </div>
 
     <script>
-    function updateMenuScores() {
+    functio    function updateMenuScores() {
       const b1 = Number(localStorage.getItem('pixelplay_2048_best')) || 0;
       const b2 = Number(localStorage.getItem('pixelplay_blocks_best')) || 0;
+      const b3 = Number(localStorage.getItem('pixelplay_match_best')) || 0;
       document.getElementById('best-2048').textContent = 'Рекорд: ' + b1;
       document.getElementById('best-blocks').textContent = 'Рекорд: ' + b2;
-      document.getElementById('total-best').textContent = b1 + b2;
+      document.getElementById('best-match').textContent = 'Рекорд: ' + b3;
+      document.getElementById('total-best').textContent = b1 + b2 + b3;
     }
 
     function openScreen(name) {
@@ -191,8 +193,8 @@
       if (name === 'home') updateMenuScores();
       if (name === '2048' && board2048.length === 0) init2048();
       if (name === 'blocks' && boardBlocks.length === 0) initBlocks();
+      if (name === 'match' && boardMatch.length === 0) initMatch();
     }
-
     /* ================= ИГРА 2048 ================= */
     let board2048 = [];
     let score2048 = 0;
@@ -534,6 +536,164 @@
     .g-3 { background: linear-gradient(135deg, #f43f5e, #be123c); box-shadow: 0 0 10px rgba(244,63,94,0.6); border-radius: 50% 50% 4px 50%; transform: rotate(45deg) scale(0.86); }
     .g-4 { background: linear-gradient(135deg, #f59e0b, #b45309); box-shadow: 0 0 10px rgba(245,158,11,0.6); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
     .g-5 { background: linear-gradient(135deg, #06b6d4, #0e7490); box-shadow: 0 0 10px rgba(6,182,212,0.6); border-radius: 14px 4px; }
+    /* ================= ТРИ В РЯД ================= */
+    const GEM_HEX = ['#a855f7', '#3b82f6', '#10b981', '#f43f5e', '#f59e0b', '#06b6d4'];
+    let boardMatch = [], scoreMatch = 0, movesMatch = 30, selGem = null, busyMatch = false;
+    let bestMatch = Number(localStorage.getItem('pixelplay_match_best')) || 0;
+    document.getElementById('bmatch').textContent = bestMatch;
+
+    function initMatch() {
+      boardMatch = [];
+      for (let r = 0; r < 7; r++) {
+        let row = [];
+        for (let c = 0; c < 7; c++) {
+          let t;
+          do { t = Math.floor(Math.random() * 6); }
+          while ((c >= 2 && row.at(c-1) === t && row.at(c-2) === t) ||
+                 (r >= 2 && boardMatch.at(r-1).at(c) === t && boardMatch.at(r-2).at(c) === t));
+          row.push(t);
+        }
+        boardMatch.push(row);
+      }
+      scoreMatch = 0; movesMatch = 30; selGem = null; busyMatch = false;
+      document.getElementById('smatch').textContent = 0;
+      document.getElementById('mmatch').textContent = 30;
+      document.getElementById('over-match').classList.remove('show');
+      renderMatch();
+    }
+
+    function renderMatch() {
+      const g = document.getElementById('grid-match');
+      g.innerHTML = '';
+      for (let r = 0; r < 7; r++) {
+        for (let c = 0; c < 7; c++) {
+          const cell = document.createElement('div');
+          cell.className = 'gem' + (selGem && selGem.r === r && selGem.c === c ? ' sel' : '');
+          const t = boardMatch.at(r).at(c);
+          if (t !== null) {
+            const inner = document.createElement('div');
+            inner.className = 'gem-inner g-' + t;
+            cell.appendChild(inner);
+          }
+          cell.onclick = () => tapGem(r, c);
+          cell.addEventListener('touchstart', e => {
+            cell.dataset.sx = e.touches.item(0).clientX;
+            cell.dataset.sy = e.touches.item(0).clientY;
+          }, { passive: true });
+          cell.addEventListener('touchend', e => {
+            const dx = e.changedTouches.item(0).clientX - Number(cell.dataset.sx);
+            const dy = e.changedTouches.item(0).clientY - Number(cell.dataset.sy);
+            if (Math.max(Math.abs(dx), Math.abs(dy)) > 22) {
+              selGem = null;
+              if (Math.abs(dx) > Math.abs(dy)) trySwap(r, c, r, c + (dx > 0 ? 1 : -1));
+              else trySwap(r, c, r + (dy > 0 ? 1 : -1), c);
+            }
+          });
+          g.appendChild(cell);
+        }
+      }
+    }
+
+    function tapGem(r, c) {
+      if (busyMatch || movesMatch <= 0) return;
+      if (!selGem) { selGem = { r, c }; renderMatch(); return; }
+      if (selGem.r === r && selGem.c === c) { selGem = null; renderMatch(); return; }
+      if (Math.abs(selGem.r - r) + Math.abs(selGem.c - c) === 1) {
+        const a = selGem; selGem = null; trySwap(a.r, a.c, r, c);
+      } else { selGem = { r, c }; renderMatch(); }
+    }
+
+    async function trySwap(r1, c1, r2, c2) {
+      if (busyMatch || movesMatch <= 0 || r2 < 0 || r2 >= 7 || c2 < 0 || c2 >= 7) return;
+      busyMatch = true;
+      swapCells(r1, c1, r2, c2); renderMatch();
+      await wait(160);
+      if (findMatches().size === 0) {
+        swapCells(r1, c1, r2, c2); renderMatch(); busyMatch = false; return;
+      }
+      movesMatch--; document.getElementById('mmatch').textContent = movesMatch;
+      let chain = 0;
+      while (true) {
+        const hits = findMatches();
+        if (hits.size === 0) break;
+        chain++;
+        const pts = hits.size * 30 * chain;
+        scoreMatch += pts; document.getElementById('smatch').textContent = scoreMatch;
+        if (scoreMatch > bestMatch) {
+          bestMatch = scoreMatch; document.getElementById('bmatch').textContent = bestMatch;
+          localStorage.setItem('pixelplay_match_best', bestMatch);
+        }
+        const wrap = document.getElementById('wrap-match');
+        wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake');
+        const cells = document.getElementById('grid-match').children;
+        let lastRect = null;
+        hits.forEach(k => {
+          const [r, c] = k.split(',').map(Number);
+          lastRect = cells.item(r * 7 + c).getBoundingClientRect();
+          for (let i = 0; i < 4; i++) {
+            const pt = document.createElement('div'); pt.className = 'particle';
+            pt.style.background = GEM_HEX.at(boardMatch.at(r).at(c));
+            pt.style.left = (lastRect.left + lastRect.width / 2) + 'px';
+            pt.style.top = (lastRect.top + lastRect.height / 2) + 'px';
+            pt.style.setProperty('--dx', (Math.random() - 0.5) * 80 + 'px');
+            pt.style.setProperty('--dy', (Math.random() - 0.5) * 80 + 'px');
+            document.body.appendChild(pt); setTimeout(() => pt.remove(), 600);
+          }
+          boardMatch[r][c] = null;
+        });
+        if (lastRect) {
+          const ft = document.createElement('div'); ft.className = 'float-text';
+          ft.textContent = `+${pts}${chain > 1 ? ' x' + chain : ''}`; ft.style.color = '#34d399';
+          ft.style.left = (lastRect.left + lastRect.width / 2) + 'px'; ft.style.top = lastRect.top + 'px';
+          document.body.appendChild(ft); setTimeout(() => ft.remove(), 900);
+        }
+        renderMatch(); await wait(180);
+        dropGems(); renderMatch(); await wait(180);
+      }
+      busyMatch = false;
+      if (movesMatch <= 0) {
+        document.getElementById('fmatch').textContent = 'Счет: ' + scoreMatch;
+        document.getElementById('over-match').classList.add('show');
+      }
+    }
+
+    function swapCells(r1, c1, r2, c2) {
+      const tmp = boardMatch.at(r1).at(c1);
+      boardMatch[r1][c1] = boardMatch.at(r2).at(c2);
+      boardMatch[r2][c2] = tmp;
+    }
+
+    function findMatches() {
+      const set = new Set();
+      for (let r = 0; r < 7; r++) {
+        for (let c = 0; c < 5; c++) {
+          const t = boardMatch.at(r).at(c);
+          if (t !== null && t === boardMatch.at(r).at(c+1) && t === boardMatch.at(r).at(c+2)) {
+            set.add(`${r},${c}`); set.add(`${r},${c+1}`); set.add(`${r},${c+2}`);
+          }
+        }
+      }
+      for (let c = 0; c < 7; c++) {
+        for (let r = 0; r < 5; r++) {
+          const t = boardMatch.at(r).at(c);
+          if (t !== null && t === boardMatch.at(r+1).at(c) && t === boardMatch.at(r+2).at(c)) {
+            set.add(`${r},${c}`); set.add(`${r+1},${c}`); set.add(`${r+2},${c}`);
+          }
+        }
+      }
+      return set;
+    }
+
+    function dropGems() {
+      for (let c = 0; c < 7; c++) {
+        let col = [];
+        for (let r = 6; r >= 0; r--) if (boardMatch.at(r).at(c) !== null) col.push(boardMatch.at(r).at(c));
+        while (col.length < 7) col.push(Math.floor(Math.random() * 6));
+        for (let r = 6; r >= 0; r--) boardMatch[r][c] = col.at(6 - r);
+      }
+    }
+
+    function wait(ms) { return new Promise(res => setTimeout(res, ms)); }
 
   </script>
 </body>
