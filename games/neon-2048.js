@@ -148,12 +148,17 @@ export function startGame(container, api) {
     }
     gameOver = true;
   }
-  let startX = 0, startY = 0;
-  canvas.addEventListener('pointerdown', (e) => { startX = e.clientX; startY = e.clientY; });
+    let touchX = 0, touchY = 0;
+  canvas.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    touchX = e.clientX;
+    touchY = e.clientY;
+  });
   canvas.addEventListener('pointerup', (e) => {
-    const dx = e.clientX - startX;
-    const dy = e.clientY - startY;
-    if (Math.max(Math.abs(dx), Math.abs(dy)) < 20) return;
+    e.preventDefault();
+    const dx = e.clientX - touchX;
+    const dy = e.clientY - touchY;
+    if (Math.max(Math.abs(dx), Math.abs(dy)) < 18) return;
     if (Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? 'RIGHT' : 'LEFT');
     else move(dy > 0 ? 'DOWN' : 'UP');
   });
