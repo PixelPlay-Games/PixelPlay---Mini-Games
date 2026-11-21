@@ -177,7 +177,7 @@
   </div>
 
     <script>
-    functio    function updateMenuScores() {
+    function updateMenuScores() {
       const b1 = Number(localStorage.getItem('pixelplay_2048_best')) || 0;
       const b2 = Number(localStorage.getItem('pixelplay_blocks_best')) || 0;
       const b3 = Number(localStorage.getItem('pixelplay_match_best')) || 0;
@@ -195,9 +195,9 @@
       if (name === 'blocks' && boardBlocks.length === 0) initBlocks();
       if (name === 'match' && boardMatch.length === 0) initMatch();
     }
+
     /* ================= ИГРА 2048 ================= */
-    let board2048 = [];
-    let score2048 = 0;
+    let board2048 = [], score2048 = 0;
     let best2048 = Number(localStorage.getItem('pixelplay_2048_best')) || 0;
     document.getElementById('b2048').textContent = best2048;
 
@@ -206,18 +206,12 @@
       score2048 = 0;
       document.getElementById('s2048').textContent = 0;
       document.getElementById('over-2048').classList.remove('show');
-      addTile2048();
-      addTile2048();
-      render2048();
+      addTile2048(); addTile2048(); render2048();
     }
 
     function addTile2048() {
       let empty = [];
-      for (let r = 0; r < 4; r++) {
-        for (let c = 0; c < 4; c++) {
-          if (board2048[r][c] === 0) empty.push({ r, c });
-        }
-      }
+      for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) if (board2048[r][c] === 0) empty.push({ r, c });
       if (empty.length > 0) {
         let cell = empty[Math.floor(Math.random() * empty.length)];
         board2048[cell.r][cell.c] = Math.random() < 0.9 ? 2 : 4;
@@ -225,27 +219,18 @@
     }
 
     function render2048() {
-      const g = document.getElementById('grid-2048');
-      g.innerHTML = '';
-      for (let r = 0; r < 4; r++) {
-        for (let c = 0; c < 4; c++) {
-          const v = board2048[r][c];
-          const d = document.createElement('div');
-          d.className = 'c2048' + (v ? ' v-' + (v <= 2048 ? v : 2048) + ' tile-pop' : '');
-          d.textContent = v || '';
-          g.appendChild(d);
-        }
+      const g = document.getElementById('grid-2048'); g.innerHTML = '';
+      for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+        const v = board2048[r][c], d = document.createElement('div');
+        d.className = 'c2048' + (v ? ' v-' + (v <= 2048 ? v : 2048) + ' tile-pop' : '');
+        d.textContent = v || ''; g.appendChild(d);
       }
     }
 
     function slide2048(row) {
       let arr = row.filter(v => v !== 0);
       for (let i = 0; i < arr.length - 1; i++) {
-        if (arr[i] === arr[i + 1]) {
-          arr[i] *= 2;
-          score2048 += arr[i];
-          arr.splice(i + 1, 1);
-        }
+        if (arr[i] === arr[i + 1]) { arr[i] *= 2; score2048 += arr[i]; arr.splice(i + 1, 1); }
       }
       while (arr.length < 4) arr.push(0);
       return arr;
@@ -256,24 +241,19 @@
       if (dir === 'left' || dir === 'right') {
         for (let r = 0; r < 4; r++) {
           let row = dir === 'right' ? [...board2048[r]].reverse() : [...board2048[r]];
-          row = slide2048(row);
-          board2048[r] = dir === 'right' ? row.reverse() : row;
+          row = slide2048(row); board2048[r] = dir === 'right' ? row.reverse() : row;
         }
       } else {
         for (let c = 0; c < 4; c++) {
           let col = [board2048.at(0)[c], board2048.at(1)[c], board2048.at(2)[c], board2048.at(3)[c]];
-          if (dir === 'down') col.reverse();
-          col = slide2048(col);
-          if (dir === 'down') col.reverse();
+          if (dir === 'down') col.reverse(); col = slide2048(col); if (dir === 'down') col.reverse();
           for (let r = 0; r < 4; r++) board2048[r][c] = col[r];
         }
       }
       if (prev !== JSON.stringify(board2048)) {
-        addTile2048();
-        document.getElementById('s2048').textContent = score2048;
+        addTile2048(); document.getElementById('s2048').textContent = score2048;
         if (score2048 > best2048) {
-          best2048 = score2048;
-          document.getElementById('b2048').textContent = best2048;
+          best2048 = score2048; document.getElementById('b2048').textContent = best2048;
           localStorage.setItem('pixelplay_2048_best', best2048);
         }
         render2048();
@@ -282,32 +262,22 @@
     }
 
     function check2048Over() {
-      for (let r = 0; r < 4; r++) {
-        for (let c = 0; c < 4; c++) {
-          if (board2048[r][c] === 0) return false;
-          if (c < 3 && board2048[r][c] === board2048[r][c + 1]) return false;
-          if (r < 3 && board2048[r][c] === board2048[r + 1][c]) return false;
-        }
+      for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
+        if (board2048[r][c] === 0) return false;
+        if (c < 3 && board2048[r][c] === board2048[r][c + 1]) return false;
+        if (r < 3 && board2048[r][c] === board2048[r + 1][c]) return false;
       }
       return true;
     }
 
     let sx = null, sy = null;
-    document.getElementById('area-2048').addEventListener('touchstart', e => {
-      sx = e.touches.item(0).clientX;
-      sy = e.touches.item(0).clientY;
-    });
+    document.getElementById('area-2048').addEventListener('touchstart', e => { sx = e.touches.item(0).clientX; sy = e.touches.item(0).clientY; });
     document.getElementById('area-2048').addEventListener('touchend', e => {
       if (sx === null || sy === null) return;
-      let dx = e.changedTouches.item(0).clientX - sx;
-      let dy = e.changedTouches.item(0).clientY - sy;
-      if (Math.abs(dx) > Math.abs(dy)) {
-        if (Math.abs(dx) > 30) move2048(dx > 0 ? 'right' : 'left');
-      } else {
-        if (Math.abs(dy) > 30) move2048(dy > 0 ? 'down' : 'up');
-      }
-      sx = null;
-      sy = null;
+      let dx = e.changedTouches.item(0).clientX - sx, dy = e.changedTouches.item(0).clientY - sy;
+      if (Math.abs(dx) > Math.abs(dy)) { if (Math.abs(dx) > 30) move2048(dx > 0 ? 'right' : 'left'); }
+      else { if (Math.abs(dy) > 30) move2048(dy > 0 ? 'down' : 'up'); }
+      sx = null; sy = null;
     });
     /* ================= BLOCK BLAST ================= */
     const SHAPE_CODES = [
@@ -317,10 +287,7 @@
     ];
     const SHAPES = SHAPE_CODES.map(code => code.split('/').map(row => row.split('').map(Number)));
     const COLORS = ['b-purple', 'b-blue', 'b-green', 'b-red', 'b-amber', 'b-cyan'];
-    const HEX = {
-      'b-purple': '#a855f7', 'b-blue': '#3b82f6', 'b-green': '#10b981',
-      'b-red': '#f43f5e', 'b-amber': '#f59e0b', 'b-cyan': '#06b6d4'
-    };
+    const HEX = { 'b-purple': '#a855f7', 'b-blue': '#3b82f6', 'b-green': '#10b981', 'b-red': '#f43f5e', 'b-amber': '#f59e0b', 'b-cyan': '#06b6d4' };
 
     let boardBlocks = [], pieces = [null, null, null], scoreBlocks = 0, combo = 0;
     let bestBlocks = Number(localStorage.getItem('pixelplay_blocks_best')) || 0;
@@ -331,49 +298,32 @@
       scoreBlocks = 0; combo = 0;
       document.getElementById('sblocks').textContent = 0;
       document.getElementById('over-blocks').classList.remove('show');
-      buildBlocksGrid();
-      spawnPieces();
+      buildBlocksGrid(); spawnPieces();
     }
 
     function buildBlocksGrid() {
-      const g = document.getElementById('grid-blocks');
-      g.innerHTML = '';
-      for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-          const d = document.createElement('div');
-          d.className = 'cblock' + (boardBlocks.at(r).at(c) ? ' ' + boardBlocks.at(r).at(c) : '');
-          g.appendChild(d);
-        }
+      const g = document.getElementById('grid-blocks'); g.innerHTML = '';
+      for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+        const d = document.createElement('div');
+        d.className = 'cblock' + (boardBlocks.at(r).at(c) ? ' ' + boardBlocks.at(r).at(c) : '');
+        g.appendChild(d);
       }
     }
 
     function spawnPieces() {
-      for (let i = 0; i < 3; i++) {
-        pieces[i] = {
-          shape: SHAPES.at(Math.floor(Math.random() * SHAPES.length)),
-          color: COLORS.at(Math.floor(Math.random() * COLORS.length))
-        };
-      }
-      renderDock();
-      if (isBlocksOver()) showBlocksOver();
+      for (let i = 0; i < 3; i++) pieces[i] = { shape: SHAPES.at(Math.floor(Math.random() * SHAPES.length)), color: COLORS.at(Math.floor(Math.random() * COLORS.length)) };
+      renderDock(); if (isBlocksOver()) showBlocksOver();
     }
 
     function renderDock() {
       document.querySelectorAll('.slot').forEach((slot, idx) => {
-        slot.innerHTML = '';
-        const p = pieces.at(idx);
-        if (!p) return;
-        const el = document.createElement('div');
-        el.className = 'piece-mini';
+        slot.innerHTML = ''; const p = pieces.at(idx); if (!p) return;
+        const el = document.createElement('div'); el.className = 'piece-mini';
         el.style.gridTemplateColumns = `repeat(${p.shape.at(0).length}, 17px)`;
-        p.shape.forEach(row => {
-          row.forEach(v => {
-            const c = document.createElement('div');
-            c.className = 'p-cell ' + (v ? p.color : '');
-            if (!v) c.style.opacity = '0';
-            el.appendChild(c);
-          });
-        });
+        p.shape.forEach(row => row.forEach(v => {
+          const c = document.createElement('div'); c.className = 'p-cell ' + (v ? p.color : '');
+          if (!v) c.style.opacity = '0'; el.appendChild(c);
+        }));
         slot.appendChild(el);
       });
     }
@@ -382,24 +332,16 @@
 
     document.querySelectorAll('.slot').forEach((slot, idx) => {
       slot.addEventListener('pointerdown', e => {
-        const p = pieces.at(idx);
-        if (!p) return;
-        dragIdx = idx;
-        slot.firstChild.style.opacity = '0.25';
+        const p = pieces.at(idx); if (!p) return;
+        dragIdx = idx; slot.firstChild.style.opacity = '0.25';
         const cs = document.getElementById('grid-blocks').firstChild.getBoundingClientRect().width;
-        proxyEl = document.createElement('div');
-        proxyEl.className = 'drag-proxy';
+        proxyEl = document.createElement('div'); proxyEl.className = 'drag-proxy';
         proxyEl.style.gridTemplateColumns = `repeat(${p.shape.at(0).length}, ${cs}px)`;
-        p.shape.forEach(row => {
-          row.forEach(v => {
-            const c = document.createElement('div');
-            c.style.width = cs + 'px'; c.style.height = cs + 'px'; c.style.borderRadius = '7px';
-            if (v) c.className = p.color; else c.style.opacity = '0';
-            proxyEl.appendChild(c);
-          });
-        });
-        document.body.appendChild(proxyEl);
-        moveProxy(e.clientX, e.clientY);
+        p.shape.forEach(row => row.forEach(v => {
+          const c = document.createElement('div'); c.style.width = cs + 'px'; c.style.height = cs + 'px'; c.style.borderRadius = '7px';
+          if (v) c.className = p.color; else c.style.opacity = '0'; proxyEl.appendChild(c);
+        }));
+        document.body.appendChild(proxyEl); moveProxy(e.clientX, e.clientY);
       });
     });
 
@@ -408,40 +350,24 @@
     function moveProxy(x, y) {
       proxyEl.style.left = x + 'px'; proxyEl.style.top = y + 'px';
       document.querySelectorAll('.cblock').forEach(el => el.classList.remove('ghost', 'clear-warn'));
-      const rect = proxyEl.getBoundingClientRect();
-      const gRect = document.getElementById('grid-blocks').getBoundingClientRect();
-      const step = (gRect.width + 5) / 8;
-      const c = Math.round((rect.left - gRect.left) / step);
-      const r = Math.round((rect.top - gRect.top) / step);
+      const rect = proxyEl.getBoundingClientRect(), gRect = document.getElementById('grid-blocks').getBoundingClientRect();
+      const step = (gRect.width + 5) / 8, c = Math.round((rect.left - gRect.left) / step), r = Math.round((rect.top - gRect.top) / step);
       const p = pieces.at(dragIdx);
-      if (canPlace(p.shape, r, c)) {
-        hoverPos = { r, c };
-        previewBlocks(p.shape, r, c);
-      } else hoverPos = null;
+      if (canPlace(p.shape, r, c)) { hoverPos = { r, c }; previewBlocks(p.shape, r, c); } else hoverPos = null;
     }
 
     function canPlace(shape, sr, sc) {
-      for (let r = 0; r < shape.length; r++) {
-        for (let c = 0; c < shape.at(r).length; c++) {
-          if (!shape.at(r).at(c)) continue;
-          const nr = sr + r, nc = sc + c;
-          if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8 || boardBlocks.at(nr).at(nc)) return false;
-        }
+      for (let r = 0; r < shape.length; r++) for (let c = 0; c < shape.at(r).length; c++) {
+        if (!shape.at(r).at(c)) continue;
+        const nr = sr + r, nc = sc + c;
+        if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8 || boardBlocks.at(nr).at(nc)) return false;
       }
       return true;
     }
 
     function previewBlocks(shape, sr, sc) {
-      const g = document.getElementById('grid-blocks').children;
-      const tmp = boardBlocks.map(row => [...row]);
-      for (let r = 0; r < shape.length; r++) {
-        for (let c = 0; c < shape.at(r).length; c++) {
-          if (shape.at(r).at(c)) {
-            tmp[sr + r][sc + c] = 'x';
-            g.item((sr + r) * 8 + sc + c).classList.add('ghost');
-          }
-        }
-      }
+      const g = document.getElementById('grid-blocks').children, tmp = boardBlocks.map(row => [...row]);
+      for (let r = 0; r < shape.length; r++) for (let c = 0; c < shape.at(r).length; c++) if (shape.at(r).at(c)) { tmp[sr + r][sc + c] = 'x'; g.item((sr + r) * 8 + sc + c).classList.add('ghost'); }
       for (let r = 0; r < 8; r++) if (tmp.at(r).every(v => v)) for (let c = 0; c < 8; c++) g.item(r * 8 + c).classList.add('clear-warn');
       for (let c = 0; c < 8; c++) if (tmp.every(row => row.at(c))) for (let r = 0; r < 8; r++) g.item(r * 8 + c).classList.add('clear-warn');
     }
@@ -456,86 +382,45 @@
 
     function placeBlock(idx, sr, sc, fx, fy) {
       const p = pieces.at(idx); let cnt = 0;
-      for (let r = 0; r < p.shape.length; r++) {
-        for (let c = 0; c < p.shape.at(r).length; c++) {
-          if (p.shape.at(r).at(c)) { boardBlocks[sr + r][sc + c] = p.color; cnt++; }
-        }
-      }
-      pieces[idx] = null; scoreBlocks += cnt * 10;
-      buildBlocksGrid(); renderDock();
-
+      for (let r = 0; r < p.shape.length; r++) for (let c = 0; c < p.shape.at(r).length; c++) if (p.shape.at(r).at(c)) { boardBlocks[sr + r][sc + c] = p.color; cnt++; }
+      pieces[idx] = null; scoreBlocks += cnt * 10; buildBlocksGrid(); renderDock();
       let fr = [], fc = [];
       for (let r = 0; r < 8; r++) if (boardBlocks.at(r).every(v => v)) fr.push(r);
       for (let c = 0; c < 8; c++) if (boardBlocks.every(row => row.at(c))) fc.push(c);
-
       const lines = fr.length + fc.length;
       if (lines > 0) {
         combo++; const pts = lines * 100 * lines * combo; scoreBlocks += pts;
-        const w = document.getElementById('wrap-blocks');
-        w.classList.remove('shake'); void w.offsetWidth; w.classList.add('shake');
-
-        const ft = document.createElement('div'); ft.className = 'float-text';
-        ft.textContent = `+${pts}${combo > 1 ? ' COMBO x' + combo : ''}`;
-        ft.style.color = '#facc15';
-        ft.style.left = Math.min(Math.max(fx, 80), window.innerWidth - 80) + 'px';
-        ft.style.top = Math.max(fy, 90) + 'px';
+        const w = document.getElementById('wrap-blocks'); w.classList.remove('shake'); void w.offsetWidth; w.classList.add('shake');
+        const ft = document.createElement('div'); ft.className = 'float-text'; ft.textContent = `+${pts}${combo > 1 ? ' COMBO x' + combo : ''}`;
+        ft.style.color = '#facc15'; ft.style.left = Math.min(Math.max(fx, 80), window.innerWidth - 80) + 'px'; ft.style.top = Math.max(fy, 90) + 'px';
         document.body.appendChild(ft); setTimeout(() => ft.remove(), 900);
-
         const clr = new Set();
         fr.forEach(r => { for (let c = 0; c < 8; c++) clr.add(`${r},${c}`); });
         fc.forEach(c => { for (let r = 0; r < 8; r++) clr.add(`${r},${c}`); });
-
         const g = document.getElementById('grid-blocks').children;
         clr.forEach(k => {
-          const [r, c] = k.split(',').map(Number);
-          const rect = g.item(r * 8 + c).getBoundingClientRect();
+          const [r, c] = k.split(',').map(Number), rect = g.item(r * 8 + c).getBoundingClientRect();
           for (let i = 0; i < 4; i++) {
-            const pt = document.createElement('div'); pt.className = 'particle';
-            pt.style.background = HEX[boardBlocks.at(r).at(c)];
-            pt.style.left = (rect.left + rect.width / 2) + 'px';
-            pt.style.top = (rect.top + rect.height / 2) + 'px';
-            pt.style.setProperty('--dx', (Math.random() - 0.5) * 85 + 'px');
-            pt.style.setProperty('--dy', (Math.random() - 0.5) * 85 + 'px');
+            const pt = document.createElement('div'); pt.className = 'particle'; pt.style.background = HEX[boardBlocks.at(r).at(c)];
+            pt.style.left = (rect.left + rect.width / 2) + 'px'; pt.style.top = (rect.top + rect.height / 2) + 'px';
+            pt.style.setProperty('--dx', (Math.random() - 0.5) * 85 + 'px'); pt.style.setProperty('--dy', (Math.random() - 0.5) * 85 + 'px');
             document.body.appendChild(pt); setTimeout(() => pt.remove(), 600);
           }
           boardBlocks[r][c] = null;
         });
         buildBlocksGrid();
       } else combo = 0;
-
       document.getElementById('sblocks').textContent = scoreBlocks;
-      if (scoreBlocks > bestBlocks) {
-        bestBlocks = scoreBlocks; document.getElementById('bblocks').textContent = bestBlocks;
-        localStorage.setItem('pixelplay_blocks_best', bestBlocks);
-      }
+      if (scoreBlocks > bestBlocks) { bestBlocks = scoreBlocks; document.getElementById('bblocks').textContent = bestBlocks; localStorage.setItem('pixelplay_blocks_best', bestBlocks); }
       if (pieces.every(x => !x)) spawnPieces(); else if (isBlocksOver()) showBlocksOver();
     }
 
     function isBlocksOver() {
-      for (const p of pieces) {
-        if (!p) continue;
-        for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if (canPlace(p.shape, r, c)) return false;
-      }
+      for (const p of pieces) { if (!p) continue; for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if (canPlace(p.shape, r, c)) return false; }
       return true;
     }
 
-    function showBlocksOver() {
-      document.getElementById('fblocks').textContent = 'Счет: ' + scoreBlocks;
-      document.getElementById('over-blocks').classList.add('show');
-    }
-
-    updateMenuScores();
-          .card-green  { background: linear-gradient(135deg, #059669, #064e3b); box-shadow: 0 8px 24px rgba(5,150,105,0.35); opacity: 1 !important; }
-    .grid-match { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(7, 1fr); gap: 6px; width: 100%; height: 100%; }
-    .gem { background: rgba(255,255,255,0.04); border-radius: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
-    .gem.sel { transform: scale(1.12); box-shadow: 0 0 0 2.5px #fff, 0 0 16px rgba(255,255,255,0.7); z-index: 5; }
-    .gem-inner { width: 72%; height: 72%; border-radius: 9px; animation: pop 0.22s ease; }
-    .g-0 { background: linear-gradient(135deg, #a855f7, #6b21a8); box-shadow: 0 0 10px rgba(168,85,247,0.6); border-radius: 50%; }
-    .g-1 { background: linear-gradient(135deg, #3b82f6, #1d4ed8); box-shadow: 0 0 10px rgba(59,130,246,0.6); transform: rotate(45deg) scale(0.84); }
-    .g-2 { background: linear-gradient(135deg, #10b981, #047857); box-shadow: 0 0 10px rgba(16,185,129,0.6); }
-    .g-3 { background: linear-gradient(135deg, #f43f5e, #be123c); box-shadow: 0 0 10px rgba(244,63,94,0.6); border-radius: 50% 50% 4px 50%; transform: rotate(45deg) scale(0.86); }
-    .g-4 { background: linear-gradient(135deg, #f59e0b, #b45309); box-shadow: 0 0 10px rgba(245,158,11,0.6); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
-    .g-5 { background: linear-gradient(135deg, #06b6d4, #0e7490); box-shadow: 0 0 10px rgba(6,182,212,0.6); border-radius: 14px 4px; }
+    function showBlocksOver() { document.getElementById('fblocks').textContent = 'Счет: ' + scoreBlocks; document.getElementById('over-blocks').classList.add('show'); }
     /* ================= ТРИ В РЯД ================= */
     const GEM_HEX = ['#a855f7', '#3b82f6', '#10b981', '#f43f5e', '#f59e0b', '#06b6d4'];
     let boardMatch = [], scoreMatch = 0, movesMatch = 30, selGem = null, busyMatch = false;
@@ -549,8 +434,8 @@
         for (let c = 0; c < 7; c++) {
           let t;
           do { t = Math.floor(Math.random() * 6); }
-          while ((c >= 2 && row.at(c-1) === t && row.at(c-2) === t) ||
-                 (r >= 2 && boardMatch.at(r-1).at(c) === t && boardMatch.at(r-2).at(c) === t));
+          while ((c >= 2 && row.at(c - 1) === t && row.at(c - 2) === t) ||
+                 (r >= 2 && boardMatch.at(r - 1).at(c) === t && boardMatch.at(r - 2).at(c) === t));
           row.push(t);
         }
         boardMatch.push(row);
@@ -563,34 +448,31 @@
     }
 
     function renderMatch() {
-      const g = document.getElementById('grid-match');
-      g.innerHTML = '';
-      for (let r = 0; r < 7; r++) {
-        for (let c = 0; c < 7; c++) {
-          const cell = document.createElement('div');
-          cell.className = 'gem' + (selGem && selGem.r === r && selGem.c === c ? ' sel' : '');
-          const t = boardMatch.at(r).at(c);
-          if (t !== null) {
-            const inner = document.createElement('div');
-            inner.className = 'gem-inner g-' + t;
-            cell.appendChild(inner);
-          }
-          cell.onclick = () => tapGem(r, c);
-          cell.addEventListener('touchstart', e => {
-            cell.dataset.sx = e.touches.item(0).clientX;
-            cell.dataset.sy = e.touches.item(0).clientY;
-          }, { passive: true });
-          cell.addEventListener('touchend', e => {
-            const dx = e.changedTouches.item(0).clientX - Number(cell.dataset.sx);
-            const dy = e.changedTouches.item(0).clientY - Number(cell.dataset.sy);
-            if (Math.max(Math.abs(dx), Math.abs(dy)) > 22) {
-              selGem = null;
-              if (Math.abs(dx) > Math.abs(dy)) trySwap(r, c, r, c + (dx > 0 ? 1 : -1));
-              else trySwap(r, c, r + (dy > 0 ? 1 : -1), c);
-            }
-          });
-          g.appendChild(cell);
+      const g = document.getElementById('grid-match'); g.innerHTML = '';
+      for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'gem' + (selGem && selGem.r === r && selGem.c === c ? ' sel' : '');
+        const t = boardMatch.at(r).at(c);
+        if (t !== null) {
+          const inner = document.createElement('div');
+          inner.className = 'gem-inner g-' + t;
+          cell.appendChild(inner);
         }
+        cell.onclick = () => tapGem(r, c);
+        cell.addEventListener('touchstart', e => {
+          cell.dataset.sx = e.touches.item(0).clientX;
+          cell.dataset.sy = e.touches.item(0).clientY;
+        }, { passive: true });
+        cell.addEventListener('touchend', e => {
+          const dx = e.changedTouches.item(0).clientX - Number(cell.dataset.sx);
+          const dy = e.changedTouches.item(0).clientY - Number(cell.dataset.sy);
+          if (Math.max(Math.abs(dx), Math.abs(dy)) > 22) {
+            selGem = null;
+            if (Math.abs(dx) > Math.abs(dy)) trySwap(r, c, r, c + (dx > 0 ? 1 : -1));
+            else trySwap(r, c, r + (dy > 0 ? 1 : -1), c);
+          }
+        });
+        g.appendChild(cell);
       }
     }
 
@@ -665,20 +547,16 @@
 
     function findMatches() {
       const set = new Set();
-      for (let r = 0; r < 7; r++) {
-        for (let c = 0; c < 5; c++) {
-          const t = boardMatch.at(r).at(c);
-          if (t !== null && t === boardMatch.at(r).at(c+1) && t === boardMatch.at(r).at(c+2)) {
-            set.add(`${r},${c}`); set.add(`${r},${c+1}`); set.add(`${r},${c+2}`);
-          }
+      for (let r = 0; r < 7; r++) for (let c = 0; c < 5; c++) {
+        const t = boardMatch.at(r).at(c);
+        if (t !== null && t === boardMatch.at(r).at(c + 1) && t === boardMatch.at(r).at(c + 2)) {
+          set.add(`${r},${c}`); set.add(`${r},${c + 1}`); set.add(`${r},${c + 2}`);
         }
       }
-      for (let c = 0; c < 7; c++) {
-        for (let r = 0; r < 5; r++) {
-          const t = boardMatch.at(r).at(c);
-          if (t !== null && t === boardMatch.at(r+1).at(c) && t === boardMatch.at(r+2).at(c)) {
-            set.add(`${r},${c}`); set.add(`${r+1},${c}`); set.add(`${r+2},${c}`);
-          }
+      for (let c = 0; c < 7; c++) for (let r = 0; r < 5; r++) {
+        const t = boardMatch.at(r).at(c);
+        if (t !== null && t === boardMatch.at(r + 1).at(c) && t === boardMatch.at(r + 2).at(c)) {
+          set.add(`${r},${c}`); set.add(`${r + 1},${c}`); set.add(`${r + 2},${c}`);
         }
       }
       return set;
@@ -695,6 +573,7 @@
 
     function wait(ms) { return new Promise(res => setTimeout(res, ms)); }
 
+    updateMenuScores();
   </script>
 </body>
 </html>
