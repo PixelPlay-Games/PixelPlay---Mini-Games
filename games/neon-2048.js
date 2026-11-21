@@ -218,13 +218,13 @@ export function startGame(container, api) {
 
     const wrap = document.getElementById('grid-2048-wrap');
     wrap.addEventListener('touchstart', (e) => {
-      touchStartX = e.touches.clientX;
-      touchStartY = e.touches.clientY;
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
     }, { passive: true });
 
     wrap.addEventListener('touchend', (e) => {
-      const dx = e.changedTouches.clientX - touchStartX;
-      const dy = e.changedTouches.clientY - touchStartY;
+      const dx = e.changedTouches[0].clientX - touchStartX;
+      const dy = e.changedTouches[0].clientY - touchStartY;
       if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
       if (Math.abs(dx) > Math.abs(dy)) move(dx > 0 ? 'RIGHT' : 'LEFT');
       else move(dy > 0 ? 'DOWN' : 'UP');
