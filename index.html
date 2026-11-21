@@ -6,133 +6,568 @@
   <title>PixelPlay — Mini Games</title>
   <link href="https://googleapis.com" rel="stylesheet">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; user-select: none; }
-    body { background: #0b0c14; color: #fff; padding: 20px 16px 90px; min-height: 100vh; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; user-select: none; -webkit-user-select: none; }
+    body { background: #0b0c14; color: #fff; min-height: 100vh; overflow-x: hidden; }
+    .screen { display: none; min-height: 100vh; padding: 20px 16px 30px; flex-direction: column; align-items: center; }
+    .screen.active { display: flex; }
+    
+    /* Главное меню */
+    #screen-home { align-items: stretch; padding-bottom: 90px; }
     .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-    .logo {
-      font-size: 24px; font-weight: 900;
-      background: linear-gradient(90deg, #a855f7, #3b82f6, #10b981);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .balance {
-      background: rgba(255,255,255,0.08); padding: 8px 14px; border-radius: 20px;
-      font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px;
-      border: 1px solid rgba(168,85,247,0.4);
-    }
+    .logo { font-size: 24px; font-weight: 900; background: linear-gradient(90deg, #a855f7, #3b82f6, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .balance { background: rgba(255,255,255,0.08); padding: 8px 14px; border-radius: 20px; font-size: 13px; font-weight: 700; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(168,85,247,0.4); }
     .section-title { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #9ca3af; margin-bottom: 14px; font-weight: 800; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-    .card {
-      border-radius: 22px; padding: 18px 16px; display: flex; flex-direction: column;
-      justify-content: space-between; height: 160px; cursor: pointer; transition: transform 0.2s;
-    }
+    .grid-menu { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .card { border-radius: 22px; padding: 18px 16px; display: flex; flex-direction: column; justify-content: space-between; height: 160px; cursor: pointer; transition: transform 0.2s; }
     .card:active { transform: scale(0.95); }
     .card-blue   { background: linear-gradient(135deg, #2563eb, #1e3a8a); box-shadow: 0 8px 24px rgba(37,99,235,0.35); }
     .card-purple { background: linear-gradient(135deg, #7c3aed, #3b0764); box-shadow: 0 8px 24px rgba(124,58,237,0.35); }
     .card-green  { background: linear-gradient(135deg, #059669, #064e3b); opacity: 0.6; }
     .card-red    { background: linear-gradient(135deg, #e11d48, #881337); opacity: 0.6; }
     .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
-    .icon-box {
-      width: 44px; height: 44px; border-radius: 14px; background: rgba(255,255,255,0.16);
-      display: flex; align-items: center; justify-content: center;
-    }
+    .icon-box { width: 44px; height: 44px; border-radius: 14px; background: rgba(255,255,255,0.16); display: flex; align-items: center; justify-content: center; }
     .badge { background: rgba(0,0,0,0.35); padding: 4px 8px; border-radius: 10px; font-size: 10px; font-weight: 800; text-transform: uppercase; }
     .card-title { font-size: 18px; font-weight: 900; }
     .card-sub { font-size: 12px; opacity: 0.85; margin-top: 2px; font-weight: 600; }
-    .nav {
-      position: fixed; bottom: 16px; left: 16px; right: 16px; background: rgba(20,22,36,0.92);
-      backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
-      display: flex; justify-content: space-around; padding: 12px 0;
-    }
+    .nav { position: fixed; bottom: 16px; left: 16px; right: 16px; background: rgba(20,22,36,0.92); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; display: flex; justify-content: space-around; padding: 12px 0; z-index: 20; }
     .nav-item { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11px; color: #9ca3af; text-decoration: none; font-weight: 600; }
     .nav-item.active { color: #3b82f6; font-weight: 800; }
+    /* Общие элементы игр */
+    .game-screen { justify-content: space-between; overflow: hidden; touch-action: none; }
+    .top-bar { width: 100%; max-width: 390px; display: flex; justify-content: space-between; align-items: center; }
+    .btn-icon { width: 44px; height: 44px; border-radius: 14px; background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.12); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .btn-icon:active { transform: scale(0.92); background: rgba(255,255,255,0.15); }
+    .game-title { font-size: 26px; font-weight: 900; background: linear-gradient(90deg, #a855f7, #3b82f6, #10b981); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .scores { width: 100%; max-width: 390px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 10px 0; }
+    .score-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 18px; padding: 10px 14px; display: flex; flex-direction: column; align-items: center; }
+    .score-box.best { border-color: rgba(168,85,247,0.5); background: linear-gradient(180deg, rgba(168,85,247,0.15), rgba(20,22,36,0.4)); }
+    .score-label { font-size: 11px; text-transform: uppercase; color: #9ca3af; letter-spacing: 1px; display: flex; align-items: center; gap: 5px; }
+    .score-val { font-size: 22px; font-weight: 800; margin-top: 2px; }
+    .board-wrap { position: relative; width: 100%; max-width: 380px; aspect-ratio: 1/1; background: #141625; border-radius: 24px; padding: 11px; border: 1px solid rgba(255,255,255,0.09); box-shadow: 0 12px 35px rgba(0,0,0,0.55); }
+    .overlay { position: absolute; inset: 0; background: rgba(11,12,20,0.9); backdrop-filter: blur(8px); border-radius: 24px; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 50; }
+    .overlay.show { display: flex; }
+    .btn-restart { padding: 14px 28px; border-radius: 16px; border: none; background: linear-gradient(90deg, #a855f7, #3b82f6); color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; }
+
+    /* Стили 2048 */
+    .grid-2048 { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 10px; width: 100%; height: 100%; }
+    .c2048 { background: rgba(255,255,255,0.04); border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; }
+    .tile-pop { animation: pop 0.2s ease; }
+    @keyframes pop { 0% { transform: scale(0.5); } 70% { transform: scale(1.08); } 100% { transform: scale(1); } }
+    .v-2{background:linear-gradient(135deg,#1e293b,#334155);color:#e2e8f0} .v-4{background:linear-gradient(135deg,#1d4ed8,#2563eb)} .v-8{background:linear-gradient(135deg,#4f46e5,#6366f1)} .v-16{background:linear-gradient(135deg,#7c3aed,#9333ea)} .v-32{background:linear-gradient(135deg,#c026d3,#e11d48)} .v-64{background:linear-gradient(135deg,#dc2626,#ea580c)} .v-128{background:linear-gradient(135deg,#059669,#10b981);font-size:22px} .v-256{background:linear-gradient(135deg,#0d9488,#06b6d4);font-size:22px} .v-512{background:linear-gradient(135deg,#2563eb,#a855f7);font-size:22px} .v-1024{background:linear-gradient(135deg,#e11d48,#f59e0b);font-size:19px} .v-2048{background:linear-gradient(135deg,#facc15,#ef4444,#a855f7);font-size:19px}
+
+    /* Стили Block Blast */
+    .board-wrap.shake { animation: shake 0.25s ease; }
+    @keyframes shake { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-4px,2px)} 50%{transform:translate(4px,-2px)} 75%{transform:translate(-2px,-2px)} }
+    .grid-blocks { display: grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); gap: 5px; width: 100%; height: 100%; }
+    .cblock { background: rgba(255,255,255,0.04); border-radius: 7px; transition: transform 0.12s, background 0.12s; }
+    .cblock.ghost { background: rgba(255,255,255,0.24) !important; box-shadow: inset 0 0 8px rgba(255,255,255,0.45); }
+    .cblock.clear-warn { filter: brightness(1.45); transform: scale(1.04); }
+    .b-purple{background:linear-gradient(135deg,#9333ea,#6b21a8)} .b-blue{background:linear-gradient(135deg,#3b82f6,#1d4ed8)} .b-green{background:linear-gradient(135deg,#10b981,#047857)} .b-red{background:linear-gradient(135deg,#f43f5e,#be123c)} .b-amber{background:linear-gradient(135deg,#f59e0b,#b45309)} .b-cyan{background:linear-gradient(135deg,#06b6d4,#0e7490)}
+    .dock { width: 100%; max-width: 380px; height: 115px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 22px; display: grid; grid-template-columns: repeat(3, 1fr); align-items: center; justify-items: center; padding: 8px; }
+    .slot { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; cursor: grab; }
+    .piece-mini { display: grid; gap: 3px; }
+    .piece-mini .p-cell { width: 17px; height: 17px; border-radius: 5px; }
+    .drag-proxy { position: fixed; pointer-events: none; z-index: 999; display: grid; gap: 5px; transform: translate(-50%, -135%); filter: drop-shadow(0 12px 20px rgba(0,0,0,0.65)); }
+    .float-text { position: fixed; pointer-events: none; z-index: 500; font-weight: 900; font-size: 20px; text-shadow: 0 4px 15px rgba(0,0,0,0.8); animation: floatUp 0.9s ease forwards; }
+    @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.8); } 50% { transform: translate(-50%, -25px) scale(1.15); } 100% { opacity: 0; transform: translate(-50%, -55px) scale(1); } }
+    .particle { position: fixed; width: 8px; height: 8px; border-radius: 3px; pointer-events: none; z-index: 400; animation: burst 0.6s ease-out forwards; }
+    @keyframes burst { 0% { opacity: 1; transform: translate(0,0) scale(1); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.2); } }
   </style>
 </head>
 <body>
-  <div class="header">
-    <div class="logo">PIXELPLAY</div>
-    <div class="balance">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-      <span id="total-best">0</span>
+  <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ -->
+  <div id="screen-home" class="screen active">
+    <div class="header">
+      <div class="logo">PIXELPLAY</div>
+      <div class="balance">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        <span id="total-best">0</span>
+      </div>
+    </div>
+    <div class="section-title">Мини-игры</div>
+    <div class="grid-menu">
+      <div class="card card-blue" onclick="openScreen('2048')">
+        <div class="card-top">
+          <div class="icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg></div>
+          <div class="badge" style="color:#60a5fa;">Хит</div>
+        </div>
+        <div><div class="card-title">2048</div><div class="card-sub" id="best-2048">Рекорд: 0</div></div>
+      </div>
+
+      <div class="card card-purple" onclick="openScreen('blocks')">
+        <div class="card-top">
+          <div class="icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg></div>
+          <div class="badge" style="color:#c084fc;">Новое</div>
+        </div>
+        <div><div class="card-title">Block Blast</div><div class="card-sub" id="best-blocks">Рекорд: 0</div></div>
+      </div>
+
+      <div class="card card-green">
+        <div class="card-top"><div class="icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><div class="badge">Скоро</div></div>
+        <div><div class="card-title">Игра 3</div><div class="card-sub">В разработке</div></div>
+      </div>
+
+      <div class="card card-red">
+        <div class="card-top"><div class="icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div><div class="badge">Скоро</div></div>
+        <div><div class="card-title">Игра 4</div><div class="card-sub">В разработке</div></div>
+      </div>
+    </div>
+    <div class="nav">
+      <a href="#" class="nav-item active"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>Игры</a>
+      <a href="#" class="nav-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>Топ</a>
+      <a href="#" class="nav-item"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Профиль</a>
     </div>
   </div>
 
-  <div class="section-title">Мини-игры</div>
-
-  <div class="grid">
-    <div class="card card-blue" onclick="location.href='game/2048.html'">
-      <div class="card-top">
-        <div class="icon-box">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
-        </div>
-        <div class="badge" style="color:#60a5fa;">Хит</div>
-      </div>
-      <div>
-        <div class="card-title">2048</div>
-        <div class="card-sub" id="best-2048">Рекорд: 0</div>
-      </div>
+  <!-- ЭКРАН 2: 2048 -->
+  <div id="screen-2048" class="screen game-screen">
+    <div class="top-bar">
+      <button class="btn-icon" onclick="openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
+      <div class="game-title">2048</div>
+      <button class="btn-icon" onclick="init2048()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
     </div>
-
-    <div class="card card-purple" onclick="location.href='games/blocks.html'">
-      <div class="card-top">
-        <div class="icon-box">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>
-        </div>
-        <div class="badge" style="color:#c084fc;">Новое</div>
-      </div>
-      <div>
-        <div class="card-title">Block Blast</div>
-        <div class="card-sub" id="best-blocks">Рекорд: 0</div>
-      </div>
+    <div class="scores">
+      <div class="score-box"><div class="score-label">Счет</div><div class="score-val" id="s2048">0</div></div>
+      <div class="score-box best"><div class="score-label">Рекорд</div><div class="score-val" id="b2048">0</div></div>
     </div>
-
-    <div class="card card-green">
-      <div class="card-top">
-        <div class="icon-box">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-        </div>
-        <div class="badge">Скоро</div>
-      </div>
-      <div>
-        <div class="card-title">Игра 3</div>
-        <div class="card-sub">В разработке</div>
-      </div>
+    <div class="board-wrap" id="area-2048">
+      <div class="grid-2048" id="grid-2048"></div>
+      <div class="overlay" id="over-2048"><h2 style="font-size:26px;font-weight:900;color:#f43f5e;">Игра окончена!</h2><button class="btn-restart" onclick="init2048()">Играть снова</button></div>
     </div>
-
-    <div class="card card-red">
-      <div class="card-top">
-        <div class="icon-box">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg>
-        </div>
-        <div class="badge">Скоро</div>
-      </div>
-      <div>
-        <div class="card-title">Игра 4</div>
-        <div class="card-sub">В разработке</div>
-      </div>
-    </div>
+    <div style="font-size:12px;color:#6b7280;">Свайпай в любую сторону</div>
   </div>
 
-  <div class="nav">
-    <a href="#" class="nav-item active">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
-      Игры
-    </a>
-    <a href="#" class="nav-item">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
-      Топ
-    </a>
-    <a href="#" class="nav-item">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      Профиль
-    </a>
+  <!-- ЭКРАН 3: BLOCK BLAST -->
+  <div id="screen-blocks" class="screen game-screen">
+    <div class="top-bar">
+      <button class="btn-icon" onclick="openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
+      <div class="game-title">BLOCK BLAST</div>
+      <button class="btn-icon" onclick="initBlocks()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
+    </div>
+    <div class="scores">
+      <div class="score-box"><div class="score-label">Счет</div><div class="score-val" id="sblocks">0</div></div>
+      <div class="score-box best"><div class="score-label">Рекорд</div><div class="score-val" id="bblocks">0</div></div>
+    </div>
+    <div class="board-wrap" id="wrap-blocks">
+      <div class="grid-blocks" id="grid-blocks"></div>
+      <div class="overlay" id="over-blocks"><h2 style="font-size:26px;font-weight:900;color:#f43f5e;">Нет ходов!</h2><div style="font-size:14px;color:#9ca3af;" id="fblocks">Счет: 0</div><button class="btn-restart" onclick="initBlocks()">Играть снова</button></div>
+    </div>
+    <div class="dock" id="dock"><div class="slot" data-slot="0"></div><div class="slot" data-slot="1"></div><div class="slot" data-slot="2"></div></div>
   </div>
-
   <script>
-    const best2048 = Number(localStorage.getItem('pixelplay_2048_best')) || 0;
-    const bestBlocks = Number(localStorage.getItem('pixelplay_blocks_best')) || 0;
-    document.getElementById('best-2048').textContent = 'Рекорд: ' + best2048;
-    document.getElementById('best-blocks').textContent = 'Рекорд: ' + bestBlocks;
-    document.getElementById('total-best').textContent = best2048 + bestBlocks;
+    function updateMenuScores() {
+      const b1 = Number(localStorage.getItem('pixelplay_2048_best')) || 0;
+      const b2 = Number(localStorage.getItem('pixelplay_blocks_best')) || 0;
+      document.getElementById('best-2048').textContent = 'Рекорд: ' + b1;
+      document.getElementById('best-blocks').textContent = 'Рекорд: ' + b2;
+      document.getElementById('total-best').textContent = b1 + b2;
+    }
+
+    function openScreen(name) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('screen-' + name).classList.add('active');
+      if (name === 'home') updateMenuScores();
+      if (name === '2048' && board2048.length === 0) init2048();
+      if (name === 'blocks' && boardBlocks.length === 0) initBlocks();
+    }
+
+    /* ================= ИГРА 2048 ================= */
+    let board2048 = [];
+    let score2048 = 0;
+    let best2048 = Number(localStorage.getItem('pixelplay_2048_best')) || 0;
+    document.getElementById('b2048').textContent = best2048;
+
+    function init2048() {
+      board2048 = [,
+ ,
+ ,
+       
+      ];
+      score2048 = 0;
+      document.getElementById('s2048').textContent = 0;
+      document.getElementById('over-2048').classList.remove('show');
+      addTile2048();
+      addTile2048();
+      render2048();
+    }
+
+    function addTile2048() {
+      let empty = [];
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          if (board2048[r][c] === 0) empty.push({ r: r, c: c });
+        }
+      }
+      if (empty.length > 0) {
+        let cell = empty[Math.floor(Math.random() * empty.length)];
+        board2048[cell.r][cell.c] = Math.random() < 0.9 ? 2 : 4;
+      }
+    }
+
+    function render2048() {
+      const g = document.getElementById('grid-2048');
+      g.innerHTML = '';
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          const v = board2048[r][c];
+          const d = document.createElement('div');
+          d.className = 'c2048' + (v ? ' v-' + (v <= 2048 ? v : 2048) + ' tile-pop' : '');
+          d.textContent = v || '';
+          g.appendChild(d);
+        }
+      }
+    }
+
+    function slide2048(row) {
+      let arr = row.filter(v => v !== 0);
+      for (let i = 0; i < arr.length - 1; i++) {
+        if (arr[i] === arr[i + 1]) {
+          arr[i] *= 2;
+          score2048 += arr[i];
+          arr.splice(i + 1, 1);
+        }
+      }
+      while (arr.length < 4) arr.push(0);
+      return arr;
+    }
+
+    function move2048(dir) {
+      let prev = JSON.stringify(board2048);
+      if (dir === 'left' || dir === 'right') {
+        for (let r = 0; r < 4; r++) {
+          let row = dir === 'right' ? [...board2048[r]].reverse() : [...board2048[r]];
+          row = slide2048(row);
+          board2048[r] = dir === 'right' ? row.reverse() : row;
+        }
+      } else {
+        for (let c = 0; c < 4; c++) {
+          let col = [board2048[c], board2048[c], board2048[c], board2048[c]];
+          if (dir === 'down') col.reverse();
+          col = slide2048(col);
+          if (dir === 'down') col.reverse();
+          for (let r = 0; r < 4; r++) board2048[r][c] = col[r];
+        }
+      }
+      if (prev !== JSON.stringify(board2048)) {
+        addTile2048();
+        document.getElementById('s2048').textContent = score2048;
+        if (score2048 > best2048) {
+          best2048 = score2048;
+          document.getElementById('b2048').textContent = best2048;
+          localStorage.setItem('pixelplay_2048_best', best2048);
+        }
+        render2048();
+        if (check2048Over()) document.getElementById('over-2048').classList.add('show');
+      }
+    }
+
+    function check2048Over() {
+      for (let r = 0; r < 4; r++) {
+        for (let c = 0; c < 4; c++) {
+          if (board2048[r][c] === 0) return false;
+          if (c < 3 && board2048[r][c] === board2048[r][c + 1]) return false;
+          if (r < 3 && board2048[r][c] === board2048[r + 1][c]) return false;
+        }
+      }
+      return true;
+    }
+
+    let sx = null, sy = null;
+    document.getElementById('area-2048').addEventListener('touchstart', e => {
+      sx = e.touches.clientX;
+      sy = e.touches.clientY;
+    });
+    document.getElementById('area-2048').addEventListener('touchend', e => {
+      if (sx === null || sy === null) return;
+      let dx = e.changedTouches.clientX - sx;
+      let dy = e.changedTouches.clientY - sy;
+      if (Math.abs(dx) > Math.abs(dy)) {
+        if (Math.abs(dx) > 30) move2048(dx > 0 ? 'right' : 'left');
+      } else {
+        if (Math.abs(dy) > 30) move2048(dy > 0 ? 'down' : 'up');
+      }
+      sx = null;
+      sy = null;
+    });
+    /* ================= BLOCK BLAST ================= */
+    const SHAPES = [
+      [[1]],
+      [[1,1]],
+      [[1],[1]],
+      [[1,1,1]],
+      [[1],[1],[1]],
+      [[1,1,1,1]],
+      [[1],[1],[1],[1]],
+      [[1,1],[1,1]],
+      [[1,1,1],[1,1,1],[1,1,1]],
+      [[1,1],[1,0]],
+      [[1,1],[0,1]],
+      [[1,0],[1,1]],
+      [[0,1],[1,1]],
+      [[1,1,1],[1,0,0]],
+      [[1,1,1],[0,0,1]],
+      [[1,0,0],[1,1,1]],
+      [[0,0,1],[1,1,1]],
+      [[1,1,1],[0,1,0]],
+      [[0,1,0],[1,1,1]]
+    ];
+    const COLORS = ['b-purple', 'b-blue', 'b-green', 'b-red', 'b-amber', 'b-cyan'];
+    const HEX = {
+      'b-purple': '#a855f7',
+      'b-blue': '#3b82f6',
+      'b-green': '#10b981',
+      'b-red': '#f43f5e',
+      'b-amber': '#f59e0b',
+      'b-cyan': '#06b6d4'
+    };
+
+    let boardBlocks = [];
+    let pieces = [null, null, null];
+    let scoreBlocks = 0;
+    let combo = 0;
+    let bestBlocks = Number(localStorage.getItem('pixelplay_blocks_best')) || 0;
+    document.getElementById('bblocks').textContent = bestBlocks;
+
+    function initBlocks() {
+      boardBlocks = Array(8).fill().map(() => Array(8).fill(null));
+      scoreBlocks = 0;
+      combo = 0;
+      document.getElementById('sblocks').textContent = 0;
+      document.getElementById('over-blocks').classList.remove('show');
+      buildBlocksGrid();
+      spawnPieces();
+    }
+
+    function buildBlocksGrid() {
+      const g = document.getElementById('grid-blocks');
+      g.innerHTML = '';
+      for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+          const d = document.createElement('div');
+          d.className = 'cblock' + (boardBlocks[r][c] ? ' ' + boardBlocks[r][c] : '');
+          g.appendChild(d);
+        }
+      }
+    }
+
+    function spawnPieces() {
+      for (let i = 0; i < 3; i++) {
+        pieces[i] = {
+          shape: SHAPES[Math.floor(Math.random() * SHAPES.length)],
+          color: COLORS[Math.floor(Math.random() * COLORS.length)]
+        };
+      }
+      renderDock();
+      if (isBlocksOver()) showBlocksOver();
+    }
+
+    function renderDock() {
+      document.querySelectorAll('.slot').forEach((slot, idx) => {
+        slot.innerHTML = '';
+        const p = pieces[idx];
+        if (!p) return;
+        const el = document.createElement('div');
+        el.className = 'piece-mini';
+        el.style.gridTemplateColumns = `repeat(${p.shape[0].length}, 17px)`;
+        p.shape.forEach(row => {
+          row.forEach(v => {
+            const c = document.createElement('div');
+            c.className = 'p-cell ' + (v ? p.color : '');
+            if (!v) c.style.opacity = '0';
+            el.appendChild(c);
+          });
+        });
+        slot.appendChild(el);
+      });
+    }
+
+    let dragIdx = null, proxyEl = null, hoverPos = null;
+
+    document.querySelectorAll('.slot').forEach((slot, idx) => {
+      slot.addEventListener('pointerdown', e => {
+        if (!pieces[idx]) return;
+        dragIdx = idx;
+        slot.firstChild.style.opacity = '0.25';
+        const cs = document.getElementById('grid-blocks').firstChild.getBoundingClientRect().width;
+        const p = pieces[idx];
+        proxyEl = document.createElement('div');
+        proxyEl.className = 'drag-proxy';
+        proxyEl.style.gridTemplateColumns = `repeat(${p.shape[0].length}, ${cs}px)`;
+        p.shape.forEach(row => {
+          row.forEach(v => {
+            const c = document.createElement('div');
+            c.style.width = cs + 'px';
+            c.style.height = cs + 'px';
+            c.style.borderRadius = '7px';
+            if (v) c.className = p.color;
+            else c.style.opacity = '0';
+            proxyEl.appendChild(c);
+          });
+        });
+        document.body.appendChild(proxyEl);
+        moveProxy(e.clientX, e.clientY);
+      });
+    });
+
+    window.addEventListener('pointermove', e => {
+      if (dragIdx !== null) moveProxy(e.clientX, e.clientY);
+    });
+    function moveProxy(x, y) {
+      proxyEl.style.left = x + 'px';
+      proxyEl.style.top = y + 'px';
+      document.querySelectorAll('.cblock').forEach(el => el.classList.remove('ghost', 'clear-warn'));
+      const rect = proxyEl.getBoundingClientRect();
+      const gRect = document.getElementById('grid-blocks').getBoundingClientRect();
+      const step = (gRect.width + 5) / 8;
+      const c = Math.round((rect.left - gRect.left) / step);
+      const r = Math.round((rect.top - gRect.top) / step);
+      if (canPlace(pieces[dragIdx].shape, r, c)) {
+        hoverPos = { r: r, c: c };
+        previewBlocks(pieces[dragIdx].shape, r, c);
+      } else {
+        hoverPos = null;
+      }
+    }
+
+    function canPlace(shape, sr, sc) {
+      for (let r = 0; r < shape.length; r++) {
+        for (let c = 0; c < shape[r].length; c++) {
+          if (!shape[r][c]) continue;
+          const nr = sr + r;
+          const nc = sc + c;
+          if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8 || boardBlocks[nr][nc]) return false;
+        }
+      }
+      return true;
+    }
+
+    function previewBlocks(shape, sr, sc) {
+      const g = document.getElementById('grid-blocks').children;
+      const tmp = boardBlocks.map(row => [...row]);
+      for (let r = 0; r < shape.length; r++) {
+        for (let c = 0; c < shape[r].length; c++) {
+          if (shape[r][c]) {
+            tmp[sr + r][sc + c] = 'x';
+            g[(sr + r) * 8 + sc + c].classList.add('ghost');
+          }
+        }
+      }
+      for (let r = 0; r < 8; r++) {
+        if (tmp[r].every(v => v)) for (let c = 0; c < 8; c++) g[r * 8 + c].classList.add('clear-warn');
+      }
+      for (let c = 0; c < 8; c++) {
+        if (tmp.every(row => row[c])) for (let r = 0; r < 8; r++) g[r * 8 + c].classList.add('clear-warn');
+      }
+    }
+
+    window.addEventListener('pointerup', e => {
+      if (dragIdx === null) return;
+      document.querySelectorAll('.cblock').forEach(el => el.classList.remove('ghost', 'clear-warn'));
+      if (hoverPos) {
+        placeBlock(dragIdx, hoverPos.r, hoverPos.c, e.clientX, e.clientY - 70);
+      } else if (document.querySelectorAll('.slot')[dragIdx].firstChild) {
+        document.querySelectorAll('.slot')[dragIdx].firstChild.style.opacity = '1';
+      }
+      proxyEl.remove();
+      proxyEl = null;
+      dragIdx = null;
+      hoverPos = null;
+    });
+
+    function placeBlock(idx, sr, sc, fx, fy) {
+      const p = pieces[idx];
+      let cnt = 0;
+      for (let r = 0; r < p.shape.length; r++) {
+        for (let c = 0; c < p.shape[r].length; c++) {
+          if (p.shape[r][c]) {
+            boardBlocks[sr + r][sc + c] = p.color;
+            cnt++;
+          }
+        }
+      }
+      pieces[idx] = null;
+      scoreBlocks += cnt * 10;
+      buildBlocksGrid();
+      renderDock();
+
+      let fr = [], fc = [];
+      for (let r = 0; r < 8; r++) if (boardBlocks[r].every(v => v)) fr.push(r);
+      for (let c = 0; c < 8; c++) if (boardBlocks.every(row => row[c])) fc.push(c);
+
+      const lines = fr.length + fc.length;
+      if (lines > 0) {
+        combo++;
+        const pts = lines * 100 * lines * combo;
+        scoreBlocks += pts;
+        const w = document.getElementById('wrap-blocks');
+        w.classList.remove('shake');
+        void w.offsetWidth;
+        w.classList.add('shake');
+
+        const ft = document.createElement('div');
+        ft.className = 'float-text';
+        ft.textContent = `+${pts}${combo > 1 ? ' COMBO x' + combo : ''}`;
+        ft.style.color = '#facc15';
+        ft.style.left = Math.min(Math.max(fx, 80), window.innerWidth - 80) + 'px';
+        ft.style.top = Math.max(fy, 90) + 'px';
+        document.body.appendChild(ft);
+        setTimeout(() => ft.remove(), 900);
+
+        const clr = new Set();
+        fr.forEach(r => { for (let c = 0; c < 8; c++) clr.add(`${r},${c}`); });
+        fc.forEach(c => { for (let r = 0; r < 8; r++) clr.add(`${r},${c}`); });
+
+        const g = document.getElementById('grid-blocks').children;
+        clr.forEach(k => {
+          const [r, c] = k.split(',').map(Number);
+          const rect = g[r * 8 + c].getBoundingClientRect();
+          for (let i = 0; i < 4; i++) {
+            const pt = document.createElement('div');
+            pt.className = 'particle';
+            pt.style.background = HEX[boardBlocks[r][c]];
+            pt.style.left = (rect.left + rect.width / 2) + 'px';
+            pt.style.top = (rect.top + rect.height / 2) + 'px';
+            pt.style.setProperty('--dx', (Math.random() - 0.5) * 85 + 'px');
+            pt.style.setProperty('--dy', (Math.random() - 0.5) * 85 + 'px');
+            document.body.appendChild(pt);
+            setTimeout(() => pt.remove(), 600);
+          }
+          boardBlocks[r][c] = null;
+        });
+        buildBlocksGrid();
+      } else {
+        combo = 0;
+      }
+
+      document.getElementById('sblocks').textContent = scoreBlocks;
+      if (scoreBlocks > bestBlocks) {
+        bestBlocks = scoreBlocks;
+        document.getElementById('bblocks').textContent = bestBlocks;
+        localStorage.setItem('pixelplay_blocks_best', bestBlocks);
+      }
+
+      if (pieces.every(x => !x)) spawnPieces();
+      else if (isBlocksOver()) showBlocksOver();
+    }
+
+    function isBlocksOver() {
+      for (const p of pieces) {
+        if (!p) continue;
+        for (let r = 0; r < 8; r++) {
+          for (let c = 0; c < 8; c++) {
+            if (canPlace(p.shape, r, c)) return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    function showBlocksOver() {
+      document.getElementById('fblocks').textContent = 'Счет: ' + scoreBlocks;
+      document.getElementById('over-blocks').classList.add('show');
+    }
+
+    updateMenuScores();
   </script>
 </body>
 </html>
