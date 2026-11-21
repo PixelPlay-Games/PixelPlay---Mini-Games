@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Три в ряд — PixelPlay</title>
+  <link href="https://googleapis.com" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; user-select: none; -webkit-user-select: none; }
+    body {
+      background: #0b0c14; color: #fff; display: flex; flex-direction: column;
+      align-items: center; justify-content: space-between; min-height: 100vh;
+      padding: 18px 14px 26px; overflow: hidden; touch-action: none;
+    }
+    .top-bar { width: 100%; max-width: 390px; display: flex; justify-content: space-between; align-items: center; }
+    .btn-icon {
+      width: 44px; height: 44px; border-radius: 14px; background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .btn-icon:active { transform: scale(0.92); background: rgba(255,255,255,0.15); }
+    .game-title {
+      font-size: 24px; font-weight: 900;
+      background: linear-gradient(90deg, #34d399, #3b82f6, #a855f7);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .scores { width: 100%; max-width: 390px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 12px 0; }
+    .score-box {
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 18px; padding: 10px 8px; display: flex; flex-direction: column; align-items: center;
+    }
+    .score-box.best { border-color: rgba(16,185,129,0.5); background: linear-gradient(180deg, rgba(16,185,129,0.15), rgba(20,22,36,0.4)); }
+    .score-label { font-size: 10px; text-transform: uppercase; color: #9ca3af; letter-spacing: 1px; }
+    .score-val { font-size: 21px; font-weight: 800; margin-top: 2px; }
+    .board-wrap {
+      position: relative; width: 100%; max-width: 380px; aspect-ratio: 1/1;
+      background: #141625; border-radius: 24px; padding: 11px;
+      border: 1px solid rgba(255,255,255,0.09); box-shadow: 0 12px 35px rgba(0,0,0,0.55);
+    }
+    .board-wrap.shake { animation: shake 0.25s ease; }
+    @keyframes shake { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-4px,2px)} 50%{transform:translate(4px,-2px)} 75%{transform:translate(-2px,-2px)} }
+    .grid-match { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(7, 1fr); gap: 6px; width: 100%; height: 100%; }
+    .gem { background: rgba(255,255,255,0.04); border-radius: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+    .gem.sel { transform: scale(1.12); box-shadow: 0 0 0 2.5px #fff, 0 0 16px rgba(255,255,255,0.7); z-index: 5; }
+    .gem-inner { width: 72%; height: 72%; border-radius: 9px; animation: pop 0.22s ease; }
+    @keyframes pop { 0% { transform: scale(0.5); } 70% { transform: scale(1.08); } 100% { transform: scale(1); } }
+    .g-0 { background: linear-gradient(135deg, #a855f7, #6b21a8); box-shadow: 0 0 10px rgba(168,85,247,0.6); border-radius: 50%; }
+    .g-1 { background: linear-gradient(135deg, #3b82f6, #1d4ed8); box-shadow: 0 0 10px rgba(59,130,246,0.6); transform: rotate(45deg) scale(0.84); }
+    .g-2 { background: linear-gradient(135deg, #10b981, #047857); box-shadow: 0 0 10px rgba(16,185,129,0.6); }
+    .g-3 { background: linear-gradient(135deg, #f43f5e, #be123c); box-shadow: 0 0 10px rgba(244,63,94,0.6); border-radius: 50% 50% 4px 50%; transform: rotate(45deg) scale(0.86); }
+    .g-4 { background: linear-gradient(135deg, #f59e0b, #b45309); box-shadow: 0 0 10px rgba(245,158,11,0.6); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+    .g-5 { background: linear-gradient(135deg, #06b6d4, #0e7490); box-shadow: 0 0 10px rgba(6,182,212,0.6); border-radius: 14px 4px; }
+    .overlay { position: absolute; inset: 0; background: rgba(11,12,20,0.9); backdrop-filter: blur(8px); border-radius: 24px; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 50; }
+    .overlay.show { display: flex; }
+    .btn-restart { padding: 14px 28px; border-radius: 16px; border: none; background: linear-gradient(90deg, #10b981, #3b82f6); color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; }
+    .float-text { position: fixed; pointer-events: none; z-index: 500; font-weight: 900; font-size: 20px; text-shadow: 0 4px 15px rgba(0,0,0,0.8); animation: floatUp 0.9s ease forwards; }
+    @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.8); } 50% { transform: translate(-50%, -25px) scale(1.15); } 100% { opacity: 0; transform: translate(-50%, -55px) scale(1); } }
+    .particle { position: fixed; width: 8px; height: 8px; border-radius: 3px; pointer-events: none; z-index: 400; animation: burst 0.6s ease-out forwards; }
+    @keyframes burst { 0% { opacity: 1; transform: translate(0,0) scale(1); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.2); } }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <button class="btn-icon" onclick="location.href='../index.html'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
+    <div class="game-title">ТРИ В РЯД</div>
+    <button class="btn-icon" onclick="initMatch()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
+  </div>
+  <div class="scores">
+    <div class="score-box"><div class="score-label">Счет</div><div class="score-val" id="smatch">0</div></div>
+    <div class="score-box"><div class="score-label">Ходы</div><div class="score-val" id="mmatch" style="color:#34d399;">30</div></div>
+    <div class="score-box best"><div class="score-label">Рекорд</div><div class="score-val" id="bmatch">0</div></div>
+  </div>
+  <div class="board-wrap" id="wrap-match">
+    <div class="grid-match" id="grid-match"></div>
+    <div class="overlay" id="over-match"><h2 style="font-size:26px;font-weight:900;color:#10b981;">Ходы вышли!</h2><div style="font-size:14px;color:#9ca3af;" id="fmatch">Счет: 0</div><button class="btn-restart" onclick="initMatch()">Играть снова</button></div>
+  </div>
+  <div style="font-size:12px;color:#6b7280;">Свайпай или нажимай соседние кристаллы</div>
+  <script>
+    const GEM_HEX = ['#a855f7', '#3b82f6', '#10b981', '#f43f5e', '#f59e0b', '#06b6d4'];
+    let boardMatch = [], scoreMatch = 0, movesMatch = 30, selGem = null, busyMatch = false;
+    let bestMatch = Number(localStorage.getItem('pixelplay_match_best')) || 0;
+    document.getElementById('bmatch').textContent = bestMatch;
+
+    function initMatch() {
+      boardMatch = [];
+      for (let r = 0; r < 7; r++) {
+        let row = [];
+        for (let c = 0; c < 7; c++) {
+          let t;
+          do { t = Math.floor(Math.random() * 6); }
+          while ((c >= 2 && row.at(c - 1) === t && row.at(c - 2) === t) ||
+                 (r >= 2 && boardMatch.at(r - 1).at(c) === t && boardMatch.at(r - 2).at(c) === t));
+          row.push(t);
+        }
+        boardMatch.push(row);
+      }
+      scoreMatch = 0; movesMatch = 30; selGem = null; busyMatch = false;
+      document.getElementById('smatch').textContent = 0;
+      document.getElementById('mmatch').textContent = 30;
+      document.getElementById('over-match').classList.remove('show');
+      renderMatch();
+    }
+
+    function renderMatch() {
+      const g = document.getElementById('grid-match'); g.innerHTML = '';
+      for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++) {
+        const cell = document.createElement('div');
+        cell.className = 'gem' + (selGem && selGem.r === r && selGem.c === c ? ' sel' : '');
+        const t = boardMatch.at(r).at(c);
+        if (t !== null) {
+          const inner = document.createElement('div');
+          inner.className = 'gem-inner g-' + t;
+          cell.appendChild(inner);
+        }
+        cell.onclick = () => tapGem(r, c);
+        cell.addEventListener('touchstart', e => {
+          cell.dataset.sx = e.touches.item(0).clientX;
+          cell.dataset.sy = e.touches.item(0).clientY;
+        }, { passive: true });
+        cell.addEventListener('touchend', e => {
+          const dx = e.changedTouches.item(0).clientX - Number(cell.dataset.sx);
+          const dy = e.changedTouches.item(0).clientY - Number(cell.dataset.sy);
+          if (Math.max(Math.abs(dx), Math.abs(dy)) > 22) {
+            selGem = null;
+            if (Math.abs(dx) > Math.abs(dy)) trySwap(r, c, r, c + (dx > 0 ? 1 : -1));
+            else trySwap(r, c, r + (dy > 0 ? 1 : -1), c);
+          }
+        });
+        g.appendChild(cell);
+      }
+    }
+
+    function tapGem(r, c) {
+      if (busyMatch || movesMatch <= 0) return;
+      if (!selGem) { selGem = { r, c }; renderMatch(); return; }
+      if (selGem.r === r && selGem.c === c) { selGem = null; renderMatch(); return; }
+      if (Math.abs(selGem.r - r) + Math.abs(selGem.c - c) === 1) {
+        const a = selGem; selGem = null; trySwap(a.r, a.c, r, c);
+      } else { selGem = { r, c }; renderMatch(); }
+    }
+
+    async function trySwap(r1, c1, r2, c2) {
+      if (busyMatch || movesMatch <= 0 || r2 < 0 || r2 >= 7 || c2 < 0 || c2 >= 7) return;
+      busyMatch = true;
+      swapCells(r1, c1, r2, c2); renderMatch();
+      await wait(160);
+      if (findMatches().size === 0) {
+        swapCells(r1, c1, r2, c2); renderMatch(); busyMatch = false; return;
+      }
+      movesMatch--; document.getElementById('mmatch').textContent = movesMatch;
+      let chain = 0;
+      while (true) {
+        const hits = findMatches();
+        if (hits.size === 0) break;
+        chain++;
+        const pts = hits.size * 30 * chain;
+        scoreMatch += pts; document.getElementById('smatch').textContent = scoreMatch;
+        if (scoreMatch > bestMatch) {
+          bestMatch = scoreMatch; document.getElementById('bmatch').textContent = bestMatch;
+          localStorage.setItem('pixelplay_match_best', bestMatch);
+        }
+        const wrap = document.getElementById('wrap-match');
+        wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake');
+        const cells = document.getElementById('grid-match').children;
+        let lastRect = null;
+        hits.forEach(k => {
+          const [r, c] = k.split(',').map(Number);
+          lastRect = cells.item(r * 7 + c).getBoundingClientRect();
+          for (let i = 0; i < 4; i++) {
+            const pt = document.createElement('div'); pt.className = 'particle';
+            pt.style.background = GEM_HEX.at(boardMatch.at(r).at(c));
+            pt.style.left = (lastRect.left + lastRect.width / 2) + 'px';
+            pt.style.top = (lastRect.top + lastRect.height / 2) + 'px';
+            pt.style.setProperty('--dx', (Math.random() - 0.5) * 80 + 'px');
+            pt.style.setProperty('--dy', (Math.random() - 0.5) * 80 + 'px');
+            document.body.appendChild(pt); setTimeout(() => pt.remove(), 600);
+          }
+          boardMatch[r][c] = null;
+        });
+        if (lastRect) {
+          const ft = document.createElement('div'); ft.className = 'float-text';
+          ft.textContent = `+${pts}${chain > 1 ? ' x' + chain : ''}`; ft.style.color = '#34d399';
+          ft.style.left = (lastRect.left + lastRect.width / 2) + 'px'; ft.style.top = lastRect.top + 'px';
+          document.body.appendChild(ft); setTimeout(() => ft.remove(), 900);
+        }
+        renderMatch(); await wait(180);
+        dropGems(); renderMatch(); await wait(180);
+      }
+      busyMatch = false;
+      if (movesMatch <= 0) {
+        document.getElementById('fmatch').textContent = 'Счет: ' + scoreMatch;
+        document.getElementById('over-match').classList.add('show');
+      }
+    }
+
+    function swapCells(r1, c1, r2, c2) {
+      const tmp = boardMatch.at(r1).at(c1);
+      boardMatch[r1][c1] = boardMatch.at(r2).at(c2);
+      boardMatch[r2][c2] = tmp;
+    }
+
+    function findMatches() {
+      const set = new Set();
+      for (let r = 0; r < 7; r++) for (let c = 0; c < 5; c++) {
+        const t = boardMatch.at(r).at(c);
+        if (t !== null && t === boardMatch.at(r).at(c + 1) && t === boardMatch.at(r).at(c + 2)) {
+          set.add(`${r},${c}`); set.add(`${r},${c + 1}`); set.add(`${r},${c + 2}`);
+        }
+      }
+      for (let c = 0; c < 7; c++) for (let r = 0; r < 5; r++) {
+        const t = boardMatch.at(r).at(c);
+        if (t !== null && t === boardMatch.at(r + 1).at(c) && t === boardMatch.at(r + 2).at(c)) {
+          set.add(`${r},${c}`); set.add(`${r + 1},${c}`); set.add(`${r + 2},${c}`);
+        }
+      }
+      return set;
+    }
+
+    function dropGems() {
+      for (let c = 0; c < 7; c++) {
+        let col = [];
+        for (let r = 6; r >= 0; r--) if (boardMatch.at(r).at(c) !== null) col.push(boardMatch.at(r).at(c));
+        while (col.length < 7) col.push(Math.floor(Math.random() * 6));
+        for (let r = 6; r >= 0; r--) boardMatch[r][c] = col.at(6 - r);
+      }
+    }
+
+    function wait(ms) { return new Promise(res => setTimeout(res, ms)); }
+
+    initMatch();
+  </script>
+</body>
+</html>
