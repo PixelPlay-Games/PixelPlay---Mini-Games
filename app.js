@@ -242,7 +242,10 @@ document.querySelectorAll('.game-card').forEach(card => {
     haptic('medium');
     const gameId = card.dataset.game;
     try {
-      const gameModule = await import(`./games/${gameId}.js`);
+      const startFn = (typeof BUILTIN_GAMES !== 'undefined' && BUILTIN_GAMES[gameId])
+        ? BUILTIN_GAMES[gameId]
+        : (await import(`./games/${gameId}.js?v=4`)).startGame;
+
       state.playedOnce = true;
       saveState();
 
@@ -253,7 +256,7 @@ document.querySelectorAll('.game-card').forEach(card => {
       const container = document.getElementById('game-container');
       container.innerHTML = '';
 
-      activeGameCleanup = gameModule.startGame(container, {
+      activeGameCleanup = startFn(container, {
         onScore: (score) => { document.getElementById('game-score').textContent = score; },
         spendGems: (cost) => {
           if (state.gems >= cost) {
@@ -275,6 +278,7 @@ document.querySelectorAll('.game-card').forEach(card => {
     }
   });
 });
+
 
 document.getElementById('back-to-lobby').addEventListener('click', () => {
   haptic('light');
