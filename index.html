@@ -102,10 +102,14 @@
         <div><div class="card-title">Block Blast</div><div class="card-sub" id="best-blocks">Рекорд: 0</div></div>
       </div>
 
-      <div class="card card-green">
-        <div class="card-top"><div class="icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div><div class="badge">Скоро</div></div>
-        <div><div class="card-title">Игра 3</div><div class="card-sub">В разработке</div></div>
+         <div class="card card-green" onclick="openScreen('match')">
+        <div class="card-top">
+          <div class="icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></div>
+          <div class="badge" style="color:#34d399;">Топ</div>
+        </div>
+        <div><div class="card-title">Три в ряд</div><div class="card-sub" id="best-match">Рекорд: 0</div></div>
       </div>
+
 
       <div class="card card-red">
         <div class="card-top"><div class="icon-box"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></svg></div><div class="badge">Скоро</div></div>
@@ -154,6 +158,24 @@
     </div>
     <div class="dock" id="dock"><div class="slot" data-slot="0"></div><div class="slot" data-slot="1"></div><div class="slot" data-slot="2"></div></div>
   </div>
+    <div id="screen-match" class="screen game-screen">
+    <div class="top-bar">
+      <button class="btn-icon" onclick="openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
+      <div class="game-title">ТРИ В РЯД</div>
+      <button class="btn-icon" onclick="initMatch()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
+    </div>
+    <div class="scores" style="grid-template-columns: 1fr 1fr 1fr;">
+      <div class="score-box"><div class="score-label">Счет</div><div class="score-val" id="smatch">0</div></div>
+      <div class="score-box"><div class="score-label">Ходы</div><div class="score-val" id="mmatch" style="color:#34d399;">30</div></div>
+      <div class="score-box best"><div class="score-label">Рекорд</div><div class="score-val" id="bmatch">0</div></div>
+    </div>
+    <div class="board-wrap" id="wrap-match">
+      <div class="grid-match" id="grid-match"></div>
+      <div class="overlay" id="over-match"><h2 style="font-size:26px;font-weight:900;color:#10b981;">Ходы вышли!</h2><div style="font-size:14px;color:#9ca3af;" id="fmatch">Счет: 0</div><button class="btn-restart" onclick="initMatch()">Играть снова</button></div>
+    </div>
+    <div style="font-size:12px;color:#6b7280;">Свайпай или нажимай соседние кристаллы</div>
+  </div>
+
     <script>
     function updateMenuScores() {
       const b1 = Number(localStorage.getItem('pixelplay_2048_best')) || 0;
@@ -501,6 +523,18 @@
     }
 
     updateMenuScores();
+          .card-green  { background: linear-gradient(135deg, #059669, #064e3b); box-shadow: 0 8px 24px rgba(5,150,105,0.35); opacity: 1 !important; }
+    .grid-match { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(7, 1fr); gap: 6px; width: 100%; height: 100%; }
+    .gem { background: rgba(255,255,255,0.04); border-radius: 11px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; }
+    .gem.sel { transform: scale(1.12); box-shadow: 0 0 0 2.5px #fff, 0 0 16px rgba(255,255,255,0.7); z-index: 5; }
+    .gem-inner { width: 72%; height: 72%; border-radius: 9px; animation: pop 0.22s ease; }
+    .g-0 { background: linear-gradient(135deg, #a855f7, #6b21a8); box-shadow: 0 0 10px rgba(168,85,247,0.6); border-radius: 50%; }
+    .g-1 { background: linear-gradient(135deg, #3b82f6, #1d4ed8); box-shadow: 0 0 10px rgba(59,130,246,0.6); transform: rotate(45deg) scale(0.84); }
+    .g-2 { background: linear-gradient(135deg, #10b981, #047857); box-shadow: 0 0 10px rgba(16,185,129,0.6); }
+    .g-3 { background: linear-gradient(135deg, #f43f5e, #be123c); box-shadow: 0 0 10px rgba(244,63,94,0.6); border-radius: 50% 50% 4px 50%; transform: rotate(45deg) scale(0.86); }
+    .g-4 { background: linear-gradient(135deg, #f59e0b, #b45309); box-shadow: 0 0 10px rgba(245,158,11,0.6); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
+    .g-5 { background: linear-gradient(135deg, #06b6d4, #0e7490); box-shadow: 0 0 10px rgba(6,182,212,0.6); border-radius: 14px 4px; }
+
   </script>
 </body>
 </html>
