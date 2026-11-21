@@ -154,7 +154,7 @@
     </div>
     <div class="dock" id="dock"><div class="slot" data-slot="0"></div><div class="slot" data-slot="1"></div><div class="slot" data-slot="2"></div></div>
   </div>
-  <script>
+    <script>
     function updateMenuScores() {
       const b1 = Number(localStorage.getItem('pixelplay_2048_best')) || 0;
       const b2 = Number(localStorage.getItem('pixelplay_blocks_best')) || 0;
@@ -178,11 +178,7 @@
     document.getElementById('b2048').textContent = best2048;
 
     function init2048() {
-      board2048 = [,
- ,
- ,
-       
-      ];
+      board2048 = Array(4).fill(0).map(() => Array(4).fill(0));
       score2048 = 0;
       document.getElementById('s2048').textContent = 0;
       document.getElementById('over-2048').classList.remove('show');
@@ -195,7 +191,7 @@
       let empty = [];
       for (let r = 0; r < 4; r++) {
         for (let c = 0; c < 4; c++) {
-          if (board2048[r][c] === 0) empty.push({ r: r, c: c });
+          if (board2048[r][c] === 0) empty.push({ r, c });
         }
       }
       if (empty.length > 0) {
@@ -241,8 +237,7 @@
         }
       } else {
         for (let c = 0; c < 4; c++) {
-                    let col = [board2048[0][c], board2048[1][c], board2048[2][c], board2048[3][c]];
-
+          let col = [board2048.at(0)[c], board2048.at(1)[c], board2048.at(2)[c], board2048.at(3)[c]];
           if (dir === 'down') col.reverse();
           col = slide2048(col);
           if (dir === 'down') col.reverse();
@@ -273,14 +268,15 @@
       return true;
     }
 
-       document.getElementById('area-2048').addEventListener('touchstart', e => {
-      sx = e.touches[0].clientX;
-      sy = e.touches[0].clientY;
+    let sx = null, sy = null;
+    document.getElementById('area-2048').addEventListener('touchstart', e => {
+      sx = e.touches.item(0).clientX;
+      sy = e.touches.item(0).clientY;
     });
     document.getElementById('area-2048').addEventListener('touchend', e => {
       if (sx === null || sy === null) return;
-      let dx = e.changedTouches[0].clientX - sx;
-      let dy = e.changedTouches[0].clientY - sy;
+      let dx = e.changedTouches.item(0).clientX - sx;
+      let dy = e.changedTouches.item(0).clientY - sy;
       if (Math.abs(dx) > Math.abs(dy)) {
         if (Math.abs(dx) > 30) move2048(dx > 0 ? 'right' : 'left');
       } else {
@@ -289,54 +285,30 @@
       sx = null;
       sy = null;
     });
-
     /* ================= BLOCK BLAST ================= */
-    const SHAPES = [
-      [[1]],
-      [[1,1]],
-      [[1],[1]],
-      [[1,1,1]],
-      [[1],[1],[1]],
-      [[1,1,1,1]],
-      [[1],[1],[1],[1]],
-      [[1,1],[1,1]],
-      [[1,1,1],[1,1,1],[1,1,1]],
-      [[1,1],[1,0]],
-      [[1,1],[0,1]],
-      [[1,0],[1,1]],
-      [[0,1],[1,1]],
-      [[1,1,1],[1,0,0]],
-      [[1,1,1],[0,0,1]],
-      [[1,0,0],[1,1,1]],
-      [[0,0,1],[1,1,1]],
-      [[1,1,1],[0,1,0]],
-      [[0,1,0],[1,1,1]]
+    const SHAPE_CODES = [
+      "1", "11", "1/1", "111", "1/1/1", "1111", "1/1/1/1",
+      "11/11", "111/111/111", "10/11", "01/11", "11/10", "11/01",
+      "111/010", "010/111", "110/011", "011/110", "100/111", "001/111"
     ];
+    const SHAPES = SHAPE_CODES.map(code => code.split('/').map(row => row.split('').map(Number)));
     const COLORS = ['b-purple', 'b-blue', 'b-green', 'b-red', 'b-amber', 'b-cyan'];
     const HEX = {
-      'b-purple': '#a855f7',
-      'b-blue': '#3b82f6',
-      'b-green': '#10b981',
-      'b-red': '#f43f5e',
-      'b-amber': '#f59e0b',
-      'b-cyan': '#06b6d4'
+      'b-purple': '#a855f7', 'b-blue': '#3b82f6', 'b-green': '#10b981',
+      'b-red': '#f43f5e', 'b-amber': '#f59e0b', 'b-cyan': '#06b6d4'
     };
 
-    let boardBlocks = [];
-    let pieces = [null, null, null];
-    let scoreBlocks = 0;
-    let combo = 0;
+    let boardBlocks = [], pieces = [null, null, null], scoreBlocks = 0, combo = 0;
     let bestBlocks = Number(localStorage.getItem('pixelplay_blocks_best')) || 0;
     document.getElementById('bblocks').textContent = bestBlocks;
 
-        function init2048() {
-      board2048 = Array(4).fill().map(() => Array(4).fill(0));
-      score2048 = 0;
-      document.getElementById('s2048').textContent = 0;
-      document.getElementById('over-2048').classList.remove('show');
-      addTile2048();
-      addTile2048();
-      render2048();
+    function initBlocks() {
+      boardBlocks = Array(8).fill(0).map(() => Array(8).fill(null));
+      scoreBlocks = 0; combo = 0;
+      document.getElementById('sblocks').textContent = 0;
+      document.getElementById('over-blocks').classList.remove('show');
+      buildBlocksGrid();
+      spawnPieces();
     }
 
     function buildBlocksGrid() {
@@ -345,7 +317,7 @@
       for (let r = 0; r < 8; r++) {
         for (let c = 0; c < 8; c++) {
           const d = document.createElement('div');
-          d.className = 'cblock' + (boardBlocks[r][c] ? ' ' + boardBlocks[r][c] : '');
+          d.className = 'cblock' + (boardBlocks.at(r).at(c) ? ' ' + boardBlocks.at(r).at(c) : '');
           g.appendChild(d);
         }
       }
@@ -354,8 +326,8 @@
     function spawnPieces() {
       for (let i = 0; i < 3; i++) {
         pieces[i] = {
-          shape: SHAPES[Math.floor(Math.random() * SHAPES.length)],
-          color: COLORS[Math.floor(Math.random() * COLORS.length)]
+          shape: SHAPES.at(Math.floor(Math.random() * SHAPES.length)),
+          color: COLORS.at(Math.floor(Math.random() * COLORS.length))
         };
       }
       renderDock();
@@ -365,11 +337,11 @@
     function renderDock() {
       document.querySelectorAll('.slot').forEach((slot, idx) => {
         slot.innerHTML = '';
-        const p = pieces[idx];
+        const p = pieces.at(idx);
         if (!p) return;
         const el = document.createElement('div');
         el.className = 'piece-mini';
-        el.style.gridTemplateColumns = `repeat(${p.shape[0].length}, 17px)`;
+        el.style.gridTemplateColumns = `repeat(${p.shape.at(0).length}, 17px)`;
         p.shape.forEach(row => {
           row.forEach(v => {
             const c = document.createElement('div');
@@ -386,22 +358,19 @@
 
     document.querySelectorAll('.slot').forEach((slot, idx) => {
       slot.addEventListener('pointerdown', e => {
-        if (!pieces[idx]) return;
+        const p = pieces.at(idx);
+        if (!p) return;
         dragIdx = idx;
         slot.firstChild.style.opacity = '0.25';
         const cs = document.getElementById('grid-blocks').firstChild.getBoundingClientRect().width;
-        const p = pieces[idx];
         proxyEl = document.createElement('div');
         proxyEl.className = 'drag-proxy';
-        proxyEl.style.gridTemplateColumns = `repeat(${p.shape[0].length}, ${cs}px)`;
+        proxyEl.style.gridTemplateColumns = `repeat(${p.shape.at(0).length}, ${cs}px)`;
         p.shape.forEach(row => {
           row.forEach(v => {
             const c = document.createElement('div');
-            c.style.width = cs + 'px';
-            c.style.height = cs + 'px';
-            c.style.borderRadius = '7px';
-            if (v) c.className = p.color;
-            else c.style.opacity = '0';
+            c.style.width = cs + 'px'; c.style.height = cs + 'px'; c.style.borderRadius = '7px';
+            if (v) c.className = p.color; else c.style.opacity = '0';
             proxyEl.appendChild(c);
           });
         });
@@ -410,33 +379,29 @@
       });
     });
 
-    window.addEventListener('pointermove', e => {
-      if (dragIdx !== null) moveProxy(e.clientX, e.clientY);
-    });
+    window.addEventListener('pointermove', e => { if (dragIdx !== null) moveProxy(e.clientX, e.clientY); });
+
     function moveProxy(x, y) {
-      proxyEl.style.left = x + 'px';
-      proxyEl.style.top = y + 'px';
+      proxyEl.style.left = x + 'px'; proxyEl.style.top = y + 'px';
       document.querySelectorAll('.cblock').forEach(el => el.classList.remove('ghost', 'clear-warn'));
       const rect = proxyEl.getBoundingClientRect();
       const gRect = document.getElementById('grid-blocks').getBoundingClientRect();
       const step = (gRect.width + 5) / 8;
       const c = Math.round((rect.left - gRect.left) / step);
       const r = Math.round((rect.top - gRect.top) / step);
-      if (canPlace(pieces[dragIdx].shape, r, c)) {
-        hoverPos = { r: r, c: c };
-        previewBlocks(pieces[dragIdx].shape, r, c);
-      } else {
-        hoverPos = null;
-      }
+      const p = pieces.at(dragIdx);
+      if (canPlace(p.shape, r, c)) {
+        hoverPos = { r, c };
+        previewBlocks(p.shape, r, c);
+      } else hoverPos = null;
     }
 
     function canPlace(shape, sr, sc) {
       for (let r = 0; r < shape.length; r++) {
-        for (let c = 0; c < shape[r].length; c++) {
-          if (!shape[r][c]) continue;
-          const nr = sr + r;
-          const nc = sc + c;
-          if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8 || boardBlocks[nr][nc]) return false;
+        for (let c = 0; c < shape.at(r).length; c++) {
+          if (!shape.at(r).at(c)) continue;
+          const nr = sr + r, nc = sc + c;
+          if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8 || boardBlocks.at(nr).at(nc)) return false;
         }
       }
       return true;
@@ -446,73 +411,51 @@
       const g = document.getElementById('grid-blocks').children;
       const tmp = boardBlocks.map(row => [...row]);
       for (let r = 0; r < shape.length; r++) {
-        for (let c = 0; c < shape[r].length; c++) {
-          if (shape[r][c]) {
+        for (let c = 0; c < shape.at(r).length; c++) {
+          if (shape.at(r).at(c)) {
             tmp[sr + r][sc + c] = 'x';
-            g[(sr + r) * 8 + sc + c].classList.add('ghost');
+            g.item((sr + r) * 8 + sc + c).classList.add('ghost');
           }
         }
       }
-      for (let r = 0; r < 8; r++) {
-        if (tmp[r].every(v => v)) for (let c = 0; c < 8; c++) g[r * 8 + c].classList.add('clear-warn');
-      }
-      for (let c = 0; c < 8; c++) {
-        if (tmp.every(row => row[c])) for (let r = 0; r < 8; r++) g[r * 8 + c].classList.add('clear-warn');
-      }
+      for (let r = 0; r < 8; r++) if (tmp.at(r).every(v => v)) for (let c = 0; c < 8; c++) g.item(r * 8 + c).classList.add('clear-warn');
+      for (let c = 0; c < 8; c++) if (tmp.every(row => row.at(c))) for (let r = 0; r < 8; r++) g.item(r * 8 + c).classList.add('clear-warn');
     }
 
     window.addEventListener('pointerup', e => {
       if (dragIdx === null) return;
       document.querySelectorAll('.cblock').forEach(el => el.classList.remove('ghost', 'clear-warn'));
-      if (hoverPos) {
-        placeBlock(dragIdx, hoverPos.r, hoverPos.c, e.clientX, e.clientY - 70);
-      } else if (document.querySelectorAll('.slot')[dragIdx].firstChild) {
-        document.querySelectorAll('.slot')[dragIdx].firstChild.style.opacity = '1';
-      }
-      proxyEl.remove();
-      proxyEl = null;
-      dragIdx = null;
-      hoverPos = null;
+      if (hoverPos) placeBlock(dragIdx, hoverPos.r, hoverPos.c, e.clientX, e.clientY - 70);
+      else if (document.querySelectorAll('.slot').item(dragIdx).firstChild) document.querySelectorAll('.slot').item(dragIdx).firstChild.style.opacity = '1';
+      proxyEl.remove(); proxyEl = null; dragIdx = null; hoverPos = null;
     });
 
     function placeBlock(idx, sr, sc, fx, fy) {
-      const p = pieces[idx];
-      let cnt = 0;
+      const p = pieces.at(idx); let cnt = 0;
       for (let r = 0; r < p.shape.length; r++) {
-        for (let c = 0; c < p.shape[r].length; c++) {
-          if (p.shape[r][c]) {
-            boardBlocks[sr + r][sc + c] = p.color;
-            cnt++;
-          }
+        for (let c = 0; c < p.shape.at(r).length; c++) {
+          if (p.shape.at(r).at(c)) { boardBlocks[sr + r][sc + c] = p.color; cnt++; }
         }
       }
-      pieces[idx] = null;
-      scoreBlocks += cnt * 10;
-      buildBlocksGrid();
-      renderDock();
+      pieces[idx] = null; scoreBlocks += cnt * 10;
+      buildBlocksGrid(); renderDock();
 
       let fr = [], fc = [];
-      for (let r = 0; r < 8; r++) if (boardBlocks[r].every(v => v)) fr.push(r);
-      for (let c = 0; c < 8; c++) if (boardBlocks.every(row => row[c])) fc.push(c);
+      for (let r = 0; r < 8; r++) if (boardBlocks.at(r).every(v => v)) fr.push(r);
+      for (let c = 0; c < 8; c++) if (boardBlocks.every(row => row.at(c))) fc.push(c);
 
       const lines = fr.length + fc.length;
       if (lines > 0) {
-        combo++;
-        const pts = lines * 100 * lines * combo;
-        scoreBlocks += pts;
+        combo++; const pts = lines * 100 * lines * combo; scoreBlocks += pts;
         const w = document.getElementById('wrap-blocks');
-        w.classList.remove('shake');
-        void w.offsetWidth;
-        w.classList.add('shake');
+        w.classList.remove('shake'); void w.offsetWidth; w.classList.add('shake');
 
-        const ft = document.createElement('div');
-        ft.className = 'float-text';
+        const ft = document.createElement('div'); ft.className = 'float-text';
         ft.textContent = `+${pts}${combo > 1 ? ' COMBO x' + combo : ''}`;
         ft.style.color = '#facc15';
         ft.style.left = Math.min(Math.max(fx, 80), window.innerWidth - 80) + 'px';
         ft.style.top = Math.max(fy, 90) + 'px';
-        document.body.appendChild(ft);
-        setTimeout(() => ft.remove(), 900);
+        document.body.appendChild(ft); setTimeout(() => ft.remove(), 900);
 
         const clr = new Set();
         fr.forEach(r => { for (let c = 0; c < 8; c++) clr.add(`${r},${c}`); });
@@ -521,44 +464,33 @@
         const g = document.getElementById('grid-blocks').children;
         clr.forEach(k => {
           const [r, c] = k.split(',').map(Number);
-          const rect = g[r * 8 + c].getBoundingClientRect();
+          const rect = g.item(r * 8 + c).getBoundingClientRect();
           for (let i = 0; i < 4; i++) {
-            const pt = document.createElement('div');
-            pt.className = 'particle';
-            pt.style.background = HEX[boardBlocks[r][c]];
+            const pt = document.createElement('div'); pt.className = 'particle';
+            pt.style.background = HEX[boardBlocks.at(r).at(c)];
             pt.style.left = (rect.left + rect.width / 2) + 'px';
             pt.style.top = (rect.top + rect.height / 2) + 'px';
             pt.style.setProperty('--dx', (Math.random() - 0.5) * 85 + 'px');
             pt.style.setProperty('--dy', (Math.random() - 0.5) * 85 + 'px');
-            document.body.appendChild(pt);
-            setTimeout(() => pt.remove(), 600);
+            document.body.appendChild(pt); setTimeout(() => pt.remove(), 600);
           }
           boardBlocks[r][c] = null;
         });
         buildBlocksGrid();
-      } else {
-        combo = 0;
-      }
+      } else combo = 0;
 
       document.getElementById('sblocks').textContent = scoreBlocks;
       if (scoreBlocks > bestBlocks) {
-        bestBlocks = scoreBlocks;
-        document.getElementById('bblocks').textContent = bestBlocks;
+        bestBlocks = scoreBlocks; document.getElementById('bblocks').textContent = bestBlocks;
         localStorage.setItem('pixelplay_blocks_best', bestBlocks);
       }
-
-      if (pieces.every(x => !x)) spawnPieces();
-      else if (isBlocksOver()) showBlocksOver();
+      if (pieces.every(x => !x)) spawnPieces(); else if (isBlocksOver()) showBlocksOver();
     }
 
     function isBlocksOver() {
       for (const p of pieces) {
         if (!p) continue;
-        for (let r = 0; r < 8; r++) {
-          for (let c = 0; c < 8; c++) {
-            if (canPlace(p.shape, r, c)) return false;
-          }
-        }
+        for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if (canPlace(p.shape, r, c)) return false;
       }
       return true;
     }
