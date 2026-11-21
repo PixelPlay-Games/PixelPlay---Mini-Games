@@ -328,14 +328,14 @@
     let bestBlocks = Number(localStorage.getItem('pixelplay_blocks_best')) || 0;
     document.getElementById('bblocks').textContent = bestBlocks;
 
-    function initBlocks() {
-      boardBlocks = Array(8).fill().map(() => Array(8).fill(null));
-      scoreBlocks = 0;
-      combo = 0;
-      document.getElementById('sblocks').textContent = 0;
-      document.getElementById('over-blocks').classList.remove('show');
-      buildBlocksGrid();
-      spawnPieces();
+        function init2048() {
+      board2048 = Array(4).fill().map(() => Array(4).fill(0));
+      score2048 = 0;
+      document.getElementById('s2048').textContent = 0;
+      document.getElementById('over-2048').classList.remove('show');
+      addTile2048();
+      addTile2048();
+      render2048();
     }
 
     function buildBlocksGrid() {
