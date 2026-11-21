@@ -133,10 +133,13 @@
     </a>
   </div>
 
-  <script>
-    const best2048 = localStorage.getItem('pixelplay_2048_best') || 0;
+    <script>
+    const best2048 = Number(localStorage.getItem('pixelplay_2048_best')) || 0;
+    const bestBlocks = Number(localStorage.getItem('pixelplay_blocks_best')) || 0;
     document.getElementById('best-2048').textContent = 'Рекорд: ' + best2048;
-    document.getElementById('total-best').textContent = best2048;
+    document.getElementById('best-blocks').textContent = 'Рекорд: ' + bestBlocks;
+    document.getElementById('total-best').textContent = best2048 + bestBlocks;
   </script>
+
 </body>
 </html>
