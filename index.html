@@ -391,6 +391,42 @@
     letter-spacing: 1px;
     text-transform: uppercase;
 }
+/* Жесткая фиксация экранов игр под высоту Telegram Mini App */
+.screen.game-screen {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    height: 100dvh !important;
+    max-height: 100dvh !important;
+    padding: 10px 16px 16px !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+
+.screen.game-screen:not(.active) {
+    display: none !important;
+}
+
+.screen.game-screen .top-bar {
+    width: 100%;
+    flex-shrink: 0 !important;
+    margin-bottom: 10px !important;
+}
+
+.screen.game-screen .scores {
+    width: 100%;
+    flex-shrink: 0 !important;
+    margin-bottom: 10px !important;
+}
+
+/* Все игровые поля автоматически подстраиваются под оставшееся место */
+.doodle-wrap, .stack-wrap, .knife-wrap, .flappy-wrap, .breaker-wrap, .snake-wrap, .board-wrap {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    width: 100% !important;
+}
 
   </style>
 </head>
