@@ -420,6 +420,44 @@
 #screen-stack > div:last-of-type {
     max-height: calc(100dvh - 205px) !important;
 }
+/* Жесткая фиксация шапки в одной точке для ВСЕХ игр */
+.game-screen .top-bar {
+    position: fixed !important;
+    top: 66px !important;
+    left: 16px !important;
+    right: 16px !important;
+    width: auto !important;
+    height: 44px !important;
+    margin: 0 !important;
+    z-index: 100 !important;
+}
+
+/* Все экраны игр начинают контент строго под зафиксированной шапкой */
+.game-screen,
+[id^="screen-"] {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: flex-start !important;
+    padding-top: 122px !important;
+    padding-bottom: 16px !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+
+.game-screen:not(.active),
+[id^="screen-"]:not(.active) {
+    display: none !important;
+}
+
+/* Игровые поля жестко вписываются в оставшееся место без сдвига шапки */
+.game-screen > div:last-of-type {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: calc(100vh - 215px) !important;
+    overflow: hidden !important;
+}
 
   </style>
 </head>
