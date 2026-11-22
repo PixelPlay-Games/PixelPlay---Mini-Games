@@ -99,6 +99,10 @@
     .card-pink { background: linear-gradient(135deg, #ec4899, #831843); box-shadow: 0 8px 24px rgba(236,72,153,0.35); }
     .knife-wrap { position: relative; width: 100%; max-width: 380px; height: calc(100vh - 180px); background: radial-gradient(circle at 50% 35%, #1e1b4b, #090d16); border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 12px 35px rgba(0,0,0,0.6); cursor: pointer; }
     #canvas-knife { width: 100%; height: 100%; display: block; }
+    /* Стили Cyber Flappy */
+    .card-indigo { background: linear-gradient(135deg, #6366f1, #312e81); box-shadow: 0 8px 24px rgba(99,102,241,0.35); }
+    .flappy-wrap { position: relative; width: 100%; max-width: 380px; height: calc(100vh - 180px); background: #090d16; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 12px 35px rgba(0,0,0,0.6); cursor: pointer; }
+    #canvas-flappy { width: 100%; height: 100%; display: block; }
 
   </style>
 </head>
@@ -173,6 +177,15 @@
           <div class="badge" style="color:#f9a8d4;">Точность</div>
         </div>
         <div><div class="card-title">Knife Hit</div><div class="card-sub" id="best-knife">Рекорд: 0</div></div>
+      </div>
+      <div class="card card-indigo" onclick="openScreen('flappy')">
+        <div class="card-top">
+          <div class="icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/></svg>
+          </div>
+          <div class="badge" style="color:#a5b4fc;">Хардкор</div>
+        </div>
+        <div><div class="card-title">Cyber Flappy</div><div class="card-sub" id="best-flappy">Рекорд: 0</div></div>
       </div>
 
     </div>
@@ -314,25 +327,48 @@
     </div>
     <div style="font-size:12px;color:#6b7280;">Тапай, чтобы метать ножи в мишень</div>
   </div>
+  <!-- ЭКРАН: CYBER FLAPPY -->
+  <div id="screen-flappy" class="screen game-screen">
+    <div class="top-bar">
+      <button class="btn-icon" onclick="stopFlappy(); openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
+      <div class="game-title">CYBER FLAPPY</div>
+      <button class="btn-icon" onclick="initFlappy()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
+    </div>
+    <div class="scores">
+      <div class="score-box"><div class="score-label">Счет</div><div class="score-val" id="sflappy">0</div></div>
+      <div class="score-box best"><div class="score-label">Рекорд</div><div class="score-val" id="bflappy">0</div></div>
+    </div>
+    <div class="flappy-wrap" id="wrap-flappy">
+      <canvas id="canvas-flappy"></canvas>
+      <div class="overlay" id="over-flappy">
+        <h2 style="font-size:26px;font-weight:900;color:#6366f1;">Сбит лазером!</h2>
+        <div style="font-size:14px;color:#9ca3af;" id="fflappy">Счет: 0</div>
+        <button class="btn-restart" onclick="initFlappy()">Лететь снова</button>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#6b7280;">Тапай, чтобы удерживать высоту</div>
+  </div>
 
     <script>
         const tg = window.Telegram?.WebApp;
     if (tg) { tg.ready(); tg.expand(); }
 
-            function updateMenuScores() {
+               function updateMenuScores() {
       const b1 = Number(localStorage.getItem('pixelplay_2048_best')) || 0;
       const b2 = Number(localStorage.getItem('pixelplay_blocks_best')) || 0;
       const b3 = Number(localStorage.getItem('pixelplay_match_best')) || 0;
       const b4 = Number(localStorage.getItem('pixelplay_doodle_best')) || 0;
       const b5 = Number(localStorage.getItem('pixelplay_stack_best')) || 0;
       const b6 = Number(localStorage.getItem('pixelplay_knife_best')) || 0;
+      const b7 = Number(localStorage.getItem('pixelplay_flappy_best')) || 0;
       document.getElementById('best-2048').textContent = 'Рекорд: ' + b1;
       document.getElementById('best-blocks').textContent = 'Рекорд: ' + b2;
       document.getElementById('best-match').textContent = 'Рекорд: ' + b3;
       document.getElementById('best-doodle').textContent = 'Рекорд: ' + b4;
       document.getElementById('best-stack').textContent = 'Рекорд: ' + b5;
       document.getElementById('best-knife').textContent = 'Рекорд: ' + b6;
-      document.getElementById('total-best').textContent = b1 + b2 + b3 + b4 + b5 + b6;
+      document.getElementById('best-flappy').textContent = 'Рекорд: ' + b7;
+      document.getElementById('total-best').textContent = b1 + b2 + b3 + b4 + b5 + b6 + b7;
     }
 
     function openScreen(name) {
@@ -345,6 +381,7 @@
       if (name === 'doodle') initDoodle();
       if (name === 'stack') initStack();
       if (name === 'knife') initKnife();
+      if (name === 'flappy') initFlappy();
     }
 
     /* ================= ИГРА 2048 ================= */
@@ -1281,6 +1318,168 @@
       if (!knifeOver || kSparks.length > 0) {
         knifeAnim = requestAnimationFrame(loopKnife);
       }
+    }
+    /* ================= CYBER FLAPPY ================= */
+    let flappyAnim = null, flappyScore = 0, flappyOver = false, flappyStarted = false;
+    let bestFlappy = Number(localStorage.getItem('pixelplay_flappy_best')) || 0;
+    document.getElementById('bflappy').textContent = bestFlappy;
+
+    const fCanvas = document.getElementById('canvas-flappy');
+    const fCtx = fCanvas.getContext('2d');
+    let fBird = {}, fPipes = [], fTrail = [], fBgOffset = 0, fFrame = 0;
+
+    document.getElementById('wrap-flappy').addEventListener('pointerdown', e => {
+      if (e.target.closest('.overlay') || flappyOver) return;
+      if (!flappyStarted) flappyStarted = true;
+      fBird.vy = -6.8;
+      for (let i = 0; i < 6; i++) {
+        fTrail.push({
+          x: fBird.x - 8, y: fBird.y + (Math.random() - 0.5) * 10,
+          vx: -2 - Math.random() * 2, vy: (Math.random() - 0.5) * 2,
+          life: 1, r: Math.random() * 4 + 2
+        });
+      }
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    });
+
+    function stopFlappy() {
+      if (flappyAnim) cancelAnimationFrame(flappyAnim);
+    }
+
+    function initFlappy() {
+      stopFlappy();
+      const wrap = document.getElementById('wrap-flappy');
+      fCanvas.width = wrap.clientWidth || 350;
+      fCanvas.height = wrap.clientHeight || 500;
+      flappyScore = 0; flappyOver = false; flappyStarted = false; fFrame = 0;
+      document.getElementById('sflappy').textContent = 0;
+      document.getElementById('over-flappy').classList.remove('show');
+
+      fBird = { x: fCanvas.width * 0.28, y: fCanvas.height * 0.48, r: 14, vy: 0 };
+      fPipes = []; fTrail = [];
+      loopFlappy();
+    }
+
+    function spawnFlappyPipe() {
+      const gap = Math.max(125, 160 - flappyScore * 1.2);
+      const minTop = 65;
+      const maxTop = fCanvas.height - gap - 65;
+      const topH = minTop + Math.random() * (maxTop - minTop);
+      fPipes.push({ x: fCanvas.width + 20, w: 54, topH, gap, passed: false });
+    }
+    function loopFlappy() {
+      fFrame++;
+      const speed = 3.1 + Math.min(flappyScore * 0.05, 2.2);
+      fBgOffset = (fBgOffset + speed * 0.4) % 40;
+
+      // Кибер-фон с движущейся сеткой
+      const grad = fCtx.createLinearGradient(0, 0, 0, fCanvas.height);
+      grad.addColorStop(0, '#090d16');
+      grad.addColorStop(1, '#1e1b4b');
+      fCtx.fillStyle = grad;
+      fCtx.fillRect(0, 0, fCanvas.width, fCanvas.height);
+
+      fCtx.strokeStyle = 'rgba(99, 102, 241, 0.12)';
+      fCtx.lineWidth = 1;
+      for (let x = -fBgOffset; x < fCanvas.width; x += 40) {
+        fCtx.beginPath(); fCtx.moveTo(x, 0); fCtx.lineTo(x, fCanvas.height); fCtx.stroke();
+      }
+      for (let y = 0; y < fCanvas.height; y += 40) {
+        fCtx.beginPath(); fCtx.moveTo(0, y); fCtx.lineTo(fCanvas.width, y); fCtx.stroke();
+      }
+
+      if (!flappyStarted) {
+        fBird.y = fCanvas.height * 0.48 + Math.sin(fFrame * 0.08) * 8;
+      } else if (!flappyOver) {
+        fBird.vy += 0.34;
+        fBird.y += fBird.vy;
+
+        if (fFrame % Math.max(68, 95 - flappyScore) === 0) spawnFlappyPipe();
+
+        fPipes.forEach(p => {
+          p.x -= speed;
+          // Начисление очка
+          if (!p.passed && p.x + p.w < fBird.x) {
+            p.passed = true;
+            flappyScore++;
+            document.getElementById('sflappy').textContent = flappyScore;
+            if (flappyScore > bestFlappy) {
+              bestFlappy = flappyScore;
+              document.getElementById('bflappy').textContent = bestFlappy;
+              localStorage.setItem('pixelplay_flappy_best', bestFlappy);
+            }
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+          }
+
+          // Проверка столкновения
+          const hitX = fBird.x + fBird.r - 3 > p.x && fBird.x - fBird.r + 3 < p.x + p.w;
+          const hitY = fBird.y - fBird.r + 3 < p.topH || fBird.y + fBird.r - 3 > p.topH + p.gap;
+          if (hitX && hitY) endFlappy();
+        });
+
+        fPipes = fPipes.filter(p => p.x + p.w > -20);
+
+        if (fBird.y + fBird.r > fCanvas.height || fBird.y - fBird.r < 0) {
+          endFlappy();
+        }
+      }
+
+      // Лазерные трубы
+      fPipes.forEach(p => {
+        const pGrad = fCtx.createLinearGradient(p.x, 0, p.x + p.w, 0);
+        pGrad.addColorStop(0, '#4f46e5');
+        pGrad.addColorStop(0.5, '#818cf8');
+        pGrad.addColorStop(1, '#312e81');
+        fCtx.fillStyle = pGrad;
+        fCtx.fillRect(p.x, 0, p.w, p.topH);
+        fCtx.fillRect(p.x, p.topH + p.gap, p.w, fCanvas.height - (p.topH + p.gap));
+
+        // Неоновые наконечники ворот
+        fCtx.fillStyle = '#38bdf8';
+        fCtx.fillRect(p.x - 3, p.topH - 12, p.w + 6, 12);
+        fCtx.fillRect(p.x - 3, p.topH + p.gap, p.w + 6, 12);
+      });
+
+      // Шлейф частиц
+      if (flappyStarted && !flappyOver && fFrame % 2 === 0) {
+        fTrail.push({ x: fBird.x - 10, y: fBird.y, vx: -2, vy: 0, life: 0.8, r: 5 });
+      }
+      fTrail.forEach(t => {
+        t.x += t.vx; t.y += t.vy; t.life -= 0.04; t.r *= 0.95;
+        fCtx.fillStyle = `rgba(56, 189, 248, ${Math.max(0, t.life)})`;
+        fCtx.beginPath(); fCtx.arc(t.x, t.y, Math.max(0.5, t.r), 0, Math.PI * 2); fCtx.fill();
+      });
+      fTrail = fTrail.filter(t => t.life > 0);
+
+      // Дрон / Кибер-птица
+      fCtx.save();
+      fCtx.translate(fBird.x, fBird.y);
+      const rot = Math.min(Math.max(fBird.vy * 0.06, -0.45), 0.7);
+      fCtx.rotate(rot);
+      fCtx.fillStyle = '#38bdf8';
+      fCtx.beginPath(); fCtx.arc(0, 0, fBird.r, 0, Math.PI * 2); fCtx.fill();
+      fCtx.fillStyle = '#fff';
+      fCtx.beginPath(); fCtx.arc(5, -3, 4, 0, Math.PI * 2); fCtx.fill();
+      fCtx.fillStyle = '#f43f5e';
+      fCtx.beginPath(); fCtx.moveTo(12, -2); fCtx.lineTo(21, 2); fCtx.lineTo(12, 6); fCtx.closePath(); fCtx.fill();
+      fCtx.restore();
+
+      if (!flappyStarted) {
+        fCtx.fillStyle = 'rgba(255,255,255,0.85)';
+        fCtx.font = '800 16px Montserrat, sans-serif';
+        fCtx.textAlign = 'center';
+        fCtx.fillText('НАЖМИ, ЧТОБЫ ВЗЛЕТЕТЬ', fCanvas.width / 2, fCanvas.height * 0.65);
+      }
+
+      if (!flappyOver) flappyAnim = requestAnimationFrame(loopFlappy);
+    }
+
+    function endFlappy() {
+      if (flappyOver) return;
+      flappyOver = true;
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+      document.getElementById('fflappy').textContent = 'Счет: ' + flappyScore;
+      document.getElementById('over-flappy').classList.add('show');
     }
 
   </script>
