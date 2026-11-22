@@ -360,7 +360,7 @@
 #screen-2048, #screen-blast, #screen-doodle, #screen-stack, #screen-knife, #screen-flappy, #screen-breaker, #screen-snake,
 .game-screen {
     justify-content: flex-start !important;
-    padding-top: 64px !important;
+    padding-top: 16px !important;
 }
 html, body {
     position: fixed !important;
@@ -863,7 +863,15 @@ canvas {
 
     <script>
         const tg = window.Telegram?.WebApp;
-    if (tg) { tg.ready(); tg.expand(); }
+            if (tg) {
+            tg.ready();
+            tg.expand();
+            if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
+        }
+        document.addEventListener('touchmove', (e) => {
+            if (!e.target.closest('#screen-home')) e.preventDefault();
+        }, { passive: false });
+
 
                        function updateMenuScores() {
       const b1 = Number(localStorage.getItem('pixelplay_2048_best')) || 0;
