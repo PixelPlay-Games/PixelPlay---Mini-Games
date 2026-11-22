@@ -1361,7 +1361,8 @@
 
     const fCanvas = document.getElementById('canvas-flappy');
     const fCtx = fCanvas.getContext('2d');
-    let fBird = {}, fPipes = [], fTrail = [], fBgOffset = 0, fFrame = 0;
+        let fBird = {}, fPipes = [], fTrail = [], fBgOffset = 0, fFrame = 0;
+    let fStars = [], fCityFar = [], fCityNear = [];
 
     document.getElementById('wrap-flappy').addEventListener('pointerdown', e => {
       if (e.target.closest('.overlay') || flappyOver) return;
@@ -1390,12 +1391,35 @@
       document.getElementById('sflappy').textContent = 0;
       document.getElementById('over-flappy').classList.remove('show');
 
+      // Звезды
+      fStars = Array.from({ length: 40 }, () => ({
+        x: Math.random() * fCanvas.width,
+        y: Math.random() * fCanvas.height * 0.65,
+        r: Math.random() * 1.8 + 0.5,
+        phase: Math.random() * Math.PI * 2
+      }));
+
+      // Дальний слой зданий
+      fCityFar = [];
+      for (let x = 0; x < fCanvas.width + 120; x += 48) {
+        fCityFar.push({ x, w: 44, h: 90 + Math.random() * 110 });
+      }
+
+      // Ближний слой зданий с неоновыми окнами
+      fCityNear = [];
+      for (let x = 0; x < fCanvas.width + 140; x += 64) {
+        fCityNear.push({
+          x, w: 56, h: 55 + Math.random() * 85,
+          neon: Math.random() < 0.5 ? '#ec4899' : '#38bdf8'
+        });
+      }
+
       fBird = { x: fCanvas.width * 0.28, y: fCanvas.height * 0.48, r: 14, vy: 0 };
       fPipes = []; fTrail = [];
       loopFlappy();
     }
-
     function spawnFlappyPipe() {
+
       const gap = Math.max(125, 160 - flappyScore * 1.2);
       const minTop = 65;
       const maxTop = fCanvas.height - gap - 65;
@@ -1407,21 +1431,75 @@
       const speed = 3.1 + Math.min(flappyScore * 0.05, 2.2);
       fBgOffset = (fBgOffset + speed * 0.4) % 40;
 
-      // Кибер-фон с движущейся сеткой
+         // 1. Ночное градиентное небо
       const grad = fCtx.createLinearGradient(0, 0, 0, fCanvas.height);
-      grad.addColorStop(0, '#090d16');
-      grad.addColorStop(1, '#1e1b4b');
+      grad.addColorStop(0, '#060814');
+      grad.addColorStop(0.55, '#1e1b4b');
+      grad.addColorStop(1, '#311042');
       fCtx.fillStyle = grad;
       fCtx.fillRect(0, 0, fCanvas.width, fCanvas.height);
 
-      fCtx.strokeStyle = 'rgba(99, 102, 241, 0.12)';
-      fCtx.lineWidth = 1;
-      for (let x = -fBgOffset; x < fCanvas.width; x += 40) {
-        fCtx.beginPath(); fCtx.moveTo(x, 0); fCtx.lineTo(x, fCanvas.height); fCtx.stroke();
+      // 2. Мерцающие звезды
+      fStars.forEach(s => {
+        s.x -= speed * 0.08;
+        if (s.x < 0) s.x = fCanvas.width;
+        const alpha = 0.35 + 0.55 * Math.sin(fFrame * 0.05 + s.phase);
+        fCtx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+        fCtx.beginPath(); fCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2); fCtx.fill();
+      });
+
+      // 3. Неоновое Synthwave-солнце на горизонте
+      const sunX = fCanvas.width * 0.5;
+      const sunY = fCanvas.height * 0.56;
+      const sunR = 68;
+      const sunGrad = fCtx.createLinearGradient(0, sunY - sunR, 0, sunY + sunR);
+      sunGrad.addColorStop(0, '#facc15');
+      sunGrad.addColorStop(0.5, '#f43f5e');
+      sunGrad.addColorStop(1, '#a855f7');
+      fCtx.fillStyle = sunGrad;
+      fCtx.beginPath(); fCtx.arc(sunX, sunY, sunR, 0, Math.PI * 2); fCtx.fill();
+
+      // Полосы на солнце
+      fCtx.fillStyle = '#1e1b4b';
+      for (let i = 0; i < 5; i++) {
+        const stripeY = sunY + 8 + i * 12;
+        fCtx.fillRect(sunX - sunR, stripeY, sunR * 2, 2 + i * 0.8);
       }
-      for (let y = 0; y < fCanvas.height; y += 40) {
-        fCtx.beginPath(); fCtx.moveTo(0, y); fCtx.lineTo(fCanvas.width, y); fCtx.stroke();
-      }
+
+      // 4. Дальний слой небоскрёбов (медленный параллакс)
+      fCtx.fillStyle = '#11142b';
+      fCityFar.forEach(b => {
+        if (!flappyOver) b.x -= speed * 0.22;
+        if (b.x + b.w < 0) {
+          b.x = Math.max(...fCityFar.map(item => item.x)) + 48;
+          b.h = 90 + Math.random() * 110;
+        }
+        fCtx.fillRect(b.x, fCanvas.height - b.h, b.w, b.h);
+      });
+
+      // 5. Ближний слой зданий со светящимися окнами (быстрый параллакс)
+      fCityNear.forEach(b => {
+        if (!flappyOver) b.x -= speed * 0.45;
+        if (b.x + b.w < 0) {
+          b.x = Math.max(...fCityNear.map(item => item.x)) + 64;
+          b.h = 55 + Math.random() * 85;
+        }
+        const by = fCanvas.height - b.h;
+        fCtx.fillStyle = '#090c1d';
+        fCtx.fillRect(b.x, by, b.w, b.h);
+
+        // Неоновая окантовка крыши
+        fCtx.fillStyle = b.neon;
+        fCtx.fillRect(b.x, by, b.w, 2);
+
+        // Окна
+        fCtx.fillStyle = 'rgba(165, 180, 252, 0.28)';
+        for (let wy = by + 10; wy < fCanvas.height - 12; wy += 14) {
+          for (let wx = b.x + 8; wx < b.x + b.w - 10; wx += 12) {
+            if ((wx + wy) % 3 !== 0) fCtx.fillRect(wx, wy, 5, 7);
+          }
+        }
+      });
 
       if (!flappyStarted) {
         fBird.y = fCanvas.height * 0.48 + Math.sin(fFrame * 0.08) * 8;
