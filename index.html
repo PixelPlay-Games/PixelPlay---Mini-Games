@@ -312,13 +312,16 @@
 .card-indigo { background: linear-gradient(145deg, #6366f1 0%, #3730a3 100%) !important; }
 .card-cyan   { background: linear-gradient(145deg, #14b8a6 0%, #0f766e 100%) !important; }
 .card-lime   { background: linear-gradient(145deg, #84cc16 0%, #3f6212 100%) !important; }
-/* Убираем белесую дымку и делаем интерфейс максимально четким */
-.bg-fx {
-  background: #07080f !important;
+/* Убираем белесую дымку и делаем интерфейс максимально 
+      .bg-fx {
+    background: radial-gradient(circle at 20% 15%, rgba(124, 58, 237, 0.16) 0%, transparent 45%),
+                radial-gradient(circle at 80% 85%, rgba(37, 99, 235, 0.16) 0%, transparent 45%),
+                #07080f !important;
 }
-.bg-orb {
-  display: none !important;
+.bg-orb, .bg-grid {
+    display: none !important;
 }
+
 .card {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
