@@ -316,16 +316,45 @@
 /* 1. Глубокий фон без сеточки */
 .bg-fx { background: radial-gradient(...), #07080f !important; }
 .bg-orb, .bg-grid { display: none !important; }
-
 /* 2. Единая капсула заголовка */
 .game-header-badge {
-    display: inline-flex; width: 215px; height: 44px;
-    background: rgba(255, 255, 255, 0.05); border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 215px;
+    height: 44px;
+    padding: 0 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    box-sizing: border-box;
+}
+.game-header-badge .badge-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--accent) 20%, transparent);
+    color: var(--accent);
+    flex-shrink: 0;
+}
+.game-header-badge .badge-title {
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
 }
 
-/* 3. Отступ под нижнее меню */
-#screen-home { padding-bottom: 120px !important; }
-/* Выводим шапку игр из-под верхней шторки Telegram */
+/* 3. Отступ под нижнее меню и вывод шапки из-под шторки Telegram */
+#screen-home {
+    padding-bottom: 120px !important;
+}
 #screen-2048, #screen-blast, #screen-doodle, #screen-stack, #screen-knife, #screen-flappy, #screen-breaker, #screen-snake,
 .game-screen {
     justify-content: flex-start !important;
