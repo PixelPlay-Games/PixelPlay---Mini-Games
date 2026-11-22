@@ -458,10 +458,16 @@ canvas {
 .booster-btn {
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.14);
+  outline: none; -webkit-tap-highlight-color: transparent;
   border-radius: 16px; padding: 10px 6px; color: #fff;
   display: flex; flex-direction: column; align-items: center; gap: 4px;
   cursor: pointer; transition: transform 0.15s, border-color 0.2s, background 0.2s;
 }
+.booster-btn:focus, .booster-btn:hover {
+  border-color: rgba(255, 255, 255, 0.14);
+  outline: none;
+}
+
 .booster-btn:active { transform: scale(0.95); }
 .booster-btn.active {
   background: rgba(59, 130, 246, 0.25);
