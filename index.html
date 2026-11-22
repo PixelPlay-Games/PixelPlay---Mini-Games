@@ -313,151 +313,18 @@
 .card-cyan   { background: linear-gradient(145deg, #14b8a6 0%, #0f766e 100%) !important; }
 .card-lime   { background: linear-gradient(145deg, #84cc16 0%, #3f6212 100%) !important; }
   
-    /* 1. Глубокий фон без сеточки */
-.bg-fx {
-    background: radial-gradient(circle at 20% 15%, rgba(124, 58, 237, 0.16) 0%, transparent 45%),
-                radial-gradient(circle at 80% 85%, rgba(37, 99, 235, 0.16) 0%, transparent 45%),
-                #07080f !important;
-}
-.bg-orb, .bg-grid {
-    display: none !important;
-}
+/* 1. Глубокий фон без сеточки */
+.bg-fx { background: radial-gradient(...), #07080f !important; }
+.bg-orb, .bg-grid { display: none !important; }
 
-/* 2. Крупные капсулы заголовков */
+/* 2. Единая капсула заголовка */
 .game-header-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    height: 44px;
-    padding: 0 20px 0 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 14px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-.game-header-badge .badge-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--accent) 20%, transparent);
-    color: var(--accent);
-}
-.game-header-badge .badge-title {
-    color: #ffffff;
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
+    display: inline-flex; width: 215px; height: 44px;
+    background: rgba(255, 255, 255, 0.05); border-radius: 14px;
 }
 
-/* 3. Жесткая фиксация шапки ниже панели Telegram и подгонка всех полей */
-.game-screen {
-    justify-content: flex-start !important;
-    padding-top: 64px !important;
-    padding-bottom: 14px !important;
-    height: 100dvh !important;
-    box-sizing: border-box !important;
-    overflow: hidden !important;
-}
-.game-screen .top-bar,
-.game-screen .scores {
-    width: 100%;
-    flex-shrink: 0 !important;
-    margin-bottom: 8px !important;
-}
-.game-screen > div:last-of-type {
-    position: relative !important;
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    max-height: calc(100dvh - 190px) !important;
-    overflow: hidden !important;
-}
-.game-screen canvas {
-    max-height: 100% !important;
-    width: auto !important;
-    max-width: 100% !important;
-    margin: 0 auto !important;
-    display: block !important;
-}
-
-/* 4. Фикс нижнего меню на главном экране */
-#screen-home {
-    padding-bottom: 120px !important;
-}
-
-/* Единый железобетонный размер капсулы и ровная шапка во всех играх */
-.top-bar {
-    display: flex !important;
-    align-items: center !important;
-    height: 44px !important;
-    box-sizing: border-box !important;
-}
-
-.game-header-badge {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 215px !important;
-    min-width: 215px !important;
-    max-width: 215px !important;
-    height: 44px !important;
-    margin: 0 auto !important;
-    box-sizing: border-box !important;
-}
-
-.game-header-badge .badge-title {
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
-}
-/* Выравниваем Stack 3D вровень с Knife Hit и Cyber Flappy */
-#screen-stack {
-    padding-top: 48px !important;
-}
-#screen-stack > div:last-of-type {
-    max-height: calc(100dvh - 205px) !important;
-}
-/* Жесткая фиксация шапки в одной точке для ВСЕХ игр */
-.game-screen .top-bar {
-    position: fixed !important;
-    top: 66px !important;
-    left: 16px !important;
-    right: 16px !important;
-    width: auto !important;
-    height: 44px !important;
-    margin: 0 !important;
-    z-index: 100 !important;
-}
-
-/* Все экраны игр начинают контент строго под зафиксированной шапкой */
-.game-screen,
-[id^="screen-"] {
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: flex-start !important;
-    padding-top: 122px !important;
-    padding-bottom: 16px !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-    overflow: hidden !important;
-    box-sizing: border-box !important;
-}
-
-.game-screen:not(.active),
-[id^="screen-"]:not(.active) {
-    display: none !important;
-}
-
-/* Игровые поля жестко вписываются в оставшееся место без сдвига шапки */
-.game-screen > div:last-of-type {
-    flex: 1 1 auto !important;
-    min-height: 0 !important;
-    max-height: calc(100vh - 215px) !important;
-    overflow: hidden !important;
-}
+/* 3. Отступ под нижнее меню */
+#screen-home { padding-bottom: 120px !important; }
 
   </style>
 </head>
