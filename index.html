@@ -363,11 +363,8 @@
     padding-top: 16px !important;
 }
 html, body {
-    position: fixed !important;
-    inset: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    overflow: hidden !important;
+    
+    
     overscroll-behavior: none !important;
     touch-action: manipulation !important;
     -webkit-user-select: none !important;
@@ -869,7 +866,8 @@ canvas {
             if (tg.disableVerticalSwipes) tg.disableVerticalSwipes();
         }
         document.addEventListener('touchmove', (e) => {
-            if (!e.target.closest('#screen-home')) e.preventDefault();
+                        if (e.target.closest('.game-screen')) e.preventDefault();
+
         }, { passive: false });
 
 
