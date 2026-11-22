@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <title>PixelPlay — Mini Games</title>
+  <script src="https://telegram.org"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>PixelPlay — Mini Games</title>
@@ -74,6 +76,18 @@
     @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.8); } 50% { transform: translate(-50%, -25px) scale(1.15); } 100% { opacity: 0; transform: translate(-50%, -55px) scale(1); } }
     .particle { position: fixed; width: 8px; height: 8px; border-radius: 3px; pointer-events: none; z-index: 400; animation: burst 0.6s ease-out forwards; }
     @keyframes burst { 0% { opacity: 1; transform: translate(0,0) scale(1); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.2); } }
+        /* Стили Три в ряд */
+    .grid-match { display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(7, 1fr); gap: 6px; width: 100%; height: 100%; }
+    .gem { background: rgba(255,255,255,0.04); border-radius: 10px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.15s; }
+    .gem.sel { background: rgba(255,255,255,0.2); transform: scale(1.08); box-shadow: 0 0 10px rgba(255,255,255,0.4); }
+    .gem-inner { width: 72%; height: 72%; border-radius: 50%; }
+    .g-0{background:linear-gradient(135deg,#a855f7,#6b21a8)} .g-1{background:linear-gradient(135deg,#3b82f6,#1d4ed8)} .g-2{background:linear-gradient(135deg,#10b981,#047857)} .g-3{background:linear-gradient(135deg,#f43f5e,#be123c)} .g-4{background:linear-gradient(135deg,#f59e0b,#b45309)} .g-5{background:linear-gradient(135deg,#06b6d4,#0e7490)}
+
+    /* Стили Doodle Jump */
+    .card-cyan { background: linear-gradient(135deg, #06b6d4, #0369a1); box-shadow: 0 8px 24px rgba(6,182,212,0.35); }
+    .doodle-wrap { position: relative; width: 100%; max-width: 380px; height: calc(100vh - 180px); background: #141625; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.09); box-shadow: 0 12px 35px rgba(0,0,0,0.55); }
+    #canvas-doodle { width: 100%; height: 100%; display: block; }
+
   </style>
 </head>
 <body>
@@ -120,6 +134,15 @@
           <div class="badge" style="color:#fda4af;">Риск</div>
         </div>
         <div><div class="card-title">Сапер</div><div class="card-sub" id="best-mines">Рекорд: 0</div></div>
+      </div>
+      <div class="card card-cyan" onclick="openScreen('doodle')">
+        <div class="card-top">
+          <div class="icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m18 15-6-6-6 6"/></svg>
+          </div>
+          <div class="badge" style="color:#67e8f9;">Аркада</div>
+        </div>
+        <div><div class="card-title">Doodle Jump</div><div class="card-sub" id="best-doodle">Рекорд: 0</div></div>
       </div>
 
     </div>
@@ -182,16 +205,42 @@
     </div>
     <div style="font-size:12px;color:#6b7280;">Свайпай или нажимай соседние кристаллы</div>
   </div>
+  <!-- ЭКРАН: DOODLE JUMP -->
+  <div id="screen-doodle" class="screen game-screen">
+    <div class="top-bar">
+      <button class="btn-icon" onclick="stopDoodle(); openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
+      <div class="game-title">DOODLE JUMP</div>
+      <button class="btn-icon" onclick="initDoodle()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
+    </div>
+    <div class="scores">
+      <div class="score-box"><div class="score-label">Счет</div><div class="score-val" id="sdoodle">0</div></div>
+      <div class="score-box best"><div class="score-label">Рекорд</div><div class="score-val" id="bdoodle">0</div></div>
+    </div>
+    <div class="doodle-wrap" id="wrap-doodle">
+      <canvas id="canvas-doodle"></canvas>
+      <div class="overlay" id="over-doodle">
+        <h2 style="font-size:26px;font-weight:900;color:#f43f5e;">Упал!</h2>
+        <div style="font-size:14px;color:#9ca3af;" id="fdoodle">Счет: 0</div>
+        <button class="btn-restart" onclick="initDoodle()">Играть снова</button>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#6b7280;">Жми левую или правую часть экрана</div>
+  </div>
 
     <script>
+        const tg = window.Telegram?.WebApp;
+    if (tg) { tg.ready(); tg.expand(); }
+
     function updateMenuScores() {
       const b1 = Number(localStorage.getItem('pixelplay_2048_best')) || 0;
       const b2 = Number(localStorage.getItem('pixelplay_blocks_best')) || 0;
       const b3 = Number(localStorage.getItem('pixelplay_match_best')) || 0;
+      const b4 = Number(localStorage.getItem('pixelplay_doodle_best')) || 0;
       document.getElementById('best-2048').textContent = 'Рекорд: ' + b1;
       document.getElementById('best-blocks').textContent = 'Рекорд: ' + b2;
       document.getElementById('best-match').textContent = 'Рекорд: ' + b3;
-      document.getElementById('total-best').textContent = b1 + b2 + b3;
+      document.getElementById('best-doodle').textContent = 'Рекорд: ' + b4;
+      document.getElementById('total-best').textContent = b1 + b2 + b3 + b4;
     }
 
     function openScreen(name) {
@@ -200,8 +249,8 @@
       if (name === 'home') updateMenuScores();
       if (name === '2048' && board2048.length === 0) init2048();
       if (name === 'blocks' && boardBlocks.length === 0) initBlocks();
-if (name === 'match' && boardMatch.length === 0) initMatch();
-
+      if (name === 'match' && boardMatch.length === 0) initMatch();
+      if (name === 'doodle') initDoodle();
     }
 
     /* ================= ИГРА 2048 ================= */
@@ -580,6 +629,118 @@ if (name === 'match' && boardMatch.length === 0) initMatch();
     }
 
     function wait(ms) { return new Promise(res => setTimeout(res, ms)); }
+    /* ================= DOODLE JUMP ================= */
+    let doodleAnim = null, doodleScore = 0, doodleOver = false;
+    let bestDoodle = Number(localStorage.getItem('pixelplay_doodle_best')) || 0;
+    document.getElementById('bdoodle').textContent = bestDoodle;
+
+    const dCanvas = document.getElementById('canvas-doodle');
+    const dCtx = dCanvas.getContext('2d');
+    let dPlayer = {}, dPlats = [], dLeft = false, dRight = false;
+
+    dCanvas.addEventListener('pointerdown', e => {
+      const rect = dCanvas.getBoundingClientRect();
+      if (e.clientX - rect.left < rect.width / 2) { dLeft = true; dRight = false; }
+      else { dRight = true; dLeft = false; }
+    });
+    window.addEventListener('pointerup', () => { dLeft = false; dRight = false; });
+
+    function stopDoodle() {
+      if (doodleAnim) cancelAnimationFrame(doodleAnim);
+    }
+
+    function initDoodle() {
+      stopDoodle();
+      const wrap = document.getElementById('wrap-doodle');
+      dCanvas.width = wrap.clientWidth || 350;
+      dCanvas.height = wrap.clientHeight || 500;
+      doodleScore = 0; doodleOver = false;
+      document.getElementById('sdoodle').textContent = 0;
+      document.getElementById('over-doodle').classList.remove('show');
+
+      dPlayer = { x: dCanvas.width / 2 - 16, y: dCanvas.height - 120, w: 32, h: 32, vx: 0, vy: -10 };
+      dPlats = [{ x: dCanvas.width / 2 - 38, y: dCanvas.height - 60, w: 76, h: 12, type: 'normal', vx: 0 }];
+      const step = dCanvas.height / 7;
+      for (let i = 1; i < 7; i++) dPlats.push(makeDoodlePlat(dCanvas.height - 60 - i * step));
+      loopDoodle();
+    }
+
+    function makeDoodlePlat(y) {
+      const w = 72, x = Math.random() * (dCanvas.width - w), r = Math.random();
+      let type = 'normal', vx = 0;
+      if (doodleScore > 250 && r < 0.25) { type = 'moving'; vx = (Math.random() < 0.5 ? -1 : 1) * 2; }
+      else if (doodleScore > 100 && r > 0.8) type = 'fragile';
+      return { x, y, w, h: 12, type, vx, broken: false };
+    }
+
+    function loopDoodle() {
+      if (doodleOver) return;
+      dPlayer.vx = dLeft ? -5.5 : (dRight ? 5.5 : dPlayer.vx * 0.8);
+      dPlayer.x += dPlayer.vx;
+      if (dPlayer.x + dPlayer.w < 0) dPlayer.x = dCanvas.width;
+      if (dPlayer.x > dCanvas.width) dPlayer.x = -dPlayer.w;
+
+      dPlayer.vy += 0.34;
+      dPlayer.y += dPlayer.vy;
+
+      dPlats.forEach(p => {
+        if (p.type === 'moving') {
+          p.x += p.vx;
+          if (p.x <= 0 || p.x + p.w >= dCanvas.width) p.vx *= -1;
+        }
+        if (dPlayer.vy > 0 && !p.broken &&
+            dPlayer.x + dPlayer.w * 0.7 > p.x && dPlayer.x + dPlayer.w * 0.3 < p.x + p.w &&
+            dPlayer.y + dPlayer.h >= p.y && dPlayer.y + dPlayer.h <= p.y + p.h + dPlayer.vy) {
+          dPlayer.vy = -10.2;
+          if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+          if (p.type === 'fragile') p.broken = true;
+        }
+      });
+
+      if (dPlayer.y < dCanvas.height * 0.45) {
+        const diff = dCanvas.height * 0.45 - dPlayer.y;
+        dPlayer.y = dCanvas.height * 0.45;
+        doodleScore += Math.floor(diff * 0.2);
+        document.getElementById('sdoodle').textContent = doodleScore;
+        if (doodleScore > bestDoodle) {
+          bestDoodle = doodleScore;
+          document.getElementById('bdoodle').textContent = bestDoodle;
+          localStorage.setItem('pixelplay_doodle_best', bestDoodle);
+        }
+        dPlats.forEach(p => p.y += diff);
+      }
+
+      dPlats = dPlats.filter(p => p.y < dCanvas.height);
+      while (dPlats.length < 7) {
+        const topY = Math.min(...dPlats.map(p => p.y));
+        dPlats.push(makeDoodlePlat(topY - dCanvas.height / 7));
+      }
+
+      dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
+      dPlats.forEach(p => {
+        if (p.broken) return;
+        dCtx.fillStyle = p.type === 'normal' ? '#10b981' : (p.type === 'moving' ? '#3b82f6' : '#f59e0b');
+        dCtx.beginPath(); dCtx.roundRect(p.x, p.y, p.w, p.h, 6); dCtx.fill();
+      });
+
+      dCtx.fillStyle = '#a855f7';
+      dCtx.beginPath(); dCtx.roundRect(dPlayer.x, dPlayer.y, dPlayer.w, dPlayer.h, 9); dCtx.fill();
+      dCtx.fillStyle = '#fff';
+      const eyeX = dLeft ? 5 : (dRight ? 15 : 10);
+      dCtx.beginPath();
+      dCtx.arc(dPlayer.x + eyeX, dPlayer.y + 12, 3, 0, Math.PI * 2);
+      dCtx.arc(dPlayer.x + eyeX + 9, dPlayer.y + 12, 3, 0, Math.PI * 2);
+      dCtx.fill();
+
+      if (dPlayer.y > dCanvas.height) {
+        doodleOver = true;
+        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+        document.getElementById('fdoodle').textContent = 'Счет: ' + doodleScore;
+        document.getElementById('over-doodle').classList.add('show');
+        return;
+      }
+      doodleAnim = requestAnimationFrame(loopDoodle);
+    }
 
     updateMenuScores();
   </script>
