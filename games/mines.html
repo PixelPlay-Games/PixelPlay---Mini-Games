@@ -57,9 +57,17 @@
       display: flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
     }
     .mode-btn.active { background: linear-gradient(90deg, #f43f5e, #a855f7); color: #fff; border-color: transparent; box-shadow: 0 6px 18px rgba(244,63,94,0.35); }
-    .overlay { position: absolute; inset: 0; background: rgba(11,12,20,0.9); backdrop-filter: blur(8px); border-radius: 24px; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 50; }
+      .overlay { position: fixed; inset: 0; background: rgba(7, 8, 15, 0.85); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
     .overlay.show { display: flex; }
-    .btn-restart { padding: 14px 28px; border-radius: 16px; border: none; background: linear-gradient(90deg, #f43f5e, #a855f7); color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; }
+    .over-card { width: 100%; max-width: 310px; background: linear-gradient(180deg, rgba(30, 32, 54, 0.96), rgba(16, 18, 32, 0.98)); border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 26px; padding: 24px 20px; text-align: center; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8); }
+    .over-badge { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: 1.5px; color: #fb7185; background: rgba(244, 63, 94, 0.15); padding: 4px 10px; border-radius: 20px; margin-bottom: 8px; }
+    .over-title { font-size: 24px; font-weight: 900; margin-bottom: 16px; color: #fff; }
+    .over-score-box { background: rgba(0, 0, 0, 0.35); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 18px; padding: 12px; margin-bottom: 18px; }
+    .over-score-lbl { font-size: 11px; color: #9ca3af; letter-spacing: 1px; margin-bottom: 4px; }
+    .over-score-num { font-size: 28px; font-weight: 900; color: #fb7185; }
+    .btn-restart { width: 100%; padding: 15px; border-radius: 16px; border: none; background: linear-gradient(90deg, #f43f5e, #a855f7); color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; margin-bottom: 8px; }
+    .btn-home-sub { width: 100%; padding: 12px; border-radius: 14px; background: transparent; border: 1px solid rgba(255, 255, 255, 0.14); color: #9ca3af; font-size: 14px; font-weight: 700; cursor: pointer; }
+
   </style>
 </head>
 <body>
@@ -75,11 +83,19 @@
   </div>
   <div class="board-wrap" id="wrap-mines">
     <div class="grid-mines" id="grid-mines"></div>
-    <div class="overlay" id="over-mines">
-      <h2 id="mstatus" style="font-size:26px;font-weight:900;color:#f43f5e;">Бум! Мина</h2>
-      <div style="font-size:14px;color:#9ca3af;" id="fmines">Счет: 0</div>
-      <button class="btn-restart" onclick="initMines()">Играть снова</button>
+       <div class="overlay" id="over-mines">
+      <div class="over-card">
+        <div class="over-badge" id="mbadge">ИГРА ОКОНЧЕНА</div>
+        <div class="over-title" id="mstatus">Бум! Мина</div>
+        <div class="over-score-box">
+          <div class="over-score-lbl">ТВОЙ СЧЕТ</div>
+          <div class="over-score-num" id="fmines">0</div>
+        </div>
+        <button class="btn-restart" onclick="initMines()">Играть снова</button>
+        <button class="btn-home-sub" onclick="location.href='../index.html'">В меню игр</button>
+      </div>
     </div>
+
   </div>
   <div class="mode-bar">
     <button class="mode-btn active" id="btn-dig" onclick="setMode('dig')">Открыть клетку</button>
@@ -182,7 +198,11 @@
         wrap.classList.remove('shake'); void wrap.offsetWidth; wrap.classList.add('shake');
         document.getElementById('mstatus').textContent = 'Бум! Мина';
         document.getElementById('mstatus').style.color = '#f43f5e';
-        document.getElementById('fmines').textContent = 'Счет: ' + score;
+       document.getElementById('mbadge').textContent = 'ИГРА ОКОНЧЕНА';
+document.getElementById('mbadge').style.color = '#fb7185';
+document.getElementById('fmines').style.color = '#fb7185';
+document.getElementById('fmines').textContent = score;
+
         document.getElementById('over-mines').classList.add('show');
         return;
       }
@@ -231,8 +251,11 @@
         }
         revealAll();
         document.getElementById('mstatus').textContent = 'Победа! +500';
-        document.getElementById('mstatus').style.color = '#34d399';
-        document.getElementById('fmines').textContent = 'Итоговый счет: ' + score;
+        document.getElementById('mstatus').style.color = '#document.getElementById('mbadge').textContent = 'ПОБЕДА!';
+document.getElementById('mbadge').style.color = '#34d399';
+document.getElementById('fmines').style.color = '#34d399';
+document.getElementById('fmines').textContent = score;
+
         document.getElementById('over-mines').classList.add('show');
       }
     }
