@@ -452,7 +452,18 @@
   <div id="screen-2048" class="screen game-screen">
     <div class="top-bar">
       <button class="btn-icon" onclick="openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
-      <div class="game-title">2048</div>
+  <div class="game-header-badge" style="--accent: #3b82f6;">
+    <span class="badge-icon">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+            <rect x="3" y="3" width="8" height="8" rx="2" />
+            <rect x="13" y="3" width="8" height="8" rx="2" opacity="0.6" />
+            <rect x="3" y="13" width="8" height="8" rx="2" opacity="0.6" />
+            <rect x="13" y="13" width="8" height="8" rx="2" />
+        </svg>
+    </span>
+    <span class="badge-title">2048</span>
+</div>
+
       <button class="btn-icon" onclick="init2048()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
     </div>
     <div class="scores">
