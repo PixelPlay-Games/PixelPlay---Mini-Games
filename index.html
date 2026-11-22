@@ -312,100 +312,23 @@
 .card-indigo { background: linear-gradient(145deg, #6366f1 0%, #3730a3 100%) !important; }
 .card-cyan   { background: linear-gradient(145deg, #14b8a6 0%, #0f766e 100%) !important; }
 .card-lime   { background: linear-gradient(145deg, #84cc16 0%, #3f6212 100%) !important; }
-/* Убираем белесую дымку и делаем интерфейс максимально */
-      .bg-fx {
-    background: radial-gradient(circle at 20% 15%, rgba(124, 58, 237, 0.16) 0%, transparent 45%),
-                radial-gradient(circle at 80% 85%, rgba(37, 99, 235, 0.16) 0%, transparent 45%),
-                #07080f !important;
-}
-.bg-orb, .bg-grid {
-    display: none !important;
-}
-
-.card {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border: 1px solid rgba(255, 255, 255, 0.22) !important;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5) !important;
-}
-.icon-box, .badge, .bottom-nav, .header-pill {
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-.game-header-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 6px 14px 6px 10px;
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.09);
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-}
-.game-header-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    height: 44px;
-    padding: 0 20px 0 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 14px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-.game-header-badge .badge-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--accent) 20%, transparent);
-    color: var(--accent);
-}
-.game-header-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    height: 44px;
-    padding: 0 20px 0 12px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 14px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-}
-.game-header-badge .badge-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 26px;
-    height: 26px;
-    border-radius: 8px;
-    background: color-mix(in srgb, var(--accent) 20%, transparent);
-    color: var(--accent);
-}
-.game-header-badge .badge-title {
-    color: #ffffff;
-    font-size: 16px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-}
-/* Жесткая фиксация экранов игр под высоту Telegram Mini App */
-.screen.game-screen {
-    display: flex !important;
-    flex-direction: column !important;
+      .game-screen {
+      
     justify-content: flex-start !important;
-    align-items: center !important;
-    height: 100dvh !important;
-    max-height: 100dvh !important;
-    padding: 10px 16px 16px !important;
+    padding-top: max(12px, env(safe-area-inset-top)) !important;
+    padding-bottom: 12px !important;
     overflow: hidden !important;
-    box-sizing: border-box !important;
 }
 
-.screen.game-screen:not(.active) {
-    display: none !important;
+.game-screen .top-bar,
+.game-screen .scores {
+    flex-shrink: 0 !important;
+}
+
+.game-screen canvas {
+    max-height: 100% !important;
+    max-width: 100% !important;
+    object-fit: contain !important;
 }
 
 .screen.game-screen .top-bar {
@@ -420,7 +343,6 @@
     margin-bottom: 10px !important;
 }
 
-/* Все игровые поля автоматически подстраиваются под оставшееся место */
 .doodle-wrap, .stack-wrap, .knife-wrap, .flappy-wrap, .breaker-wrap, .snake-wrap, .board-wrap {
     flex: 1 1 auto !important;
     min-height: 0 !important;
