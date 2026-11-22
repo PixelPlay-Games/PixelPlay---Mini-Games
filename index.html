@@ -87,6 +87,14 @@
     .card-cyan { background: linear-gradient(135deg, #06b6d4, #0369a1); box-shadow: 0 8px 24px rgba(6,182,212,0.35); }
     .doodle-wrap { position: relative; width: 100%; max-width: 380px; height: calc(100vh - 180px); background: #141625; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.09); box-shadow: 0 12px 35px rgba(0,0,0,0.55); }
     #canvas-doodle { width: 100%; height: 100%; display: block; }
+    /* Стили Stack */
+    .card-amber { background: linear-gradient(135deg, #f59e0b, #b45309); box-shadow: 0 8px 24px rgba(245,158,11,0.35); }
+    .stack-wrap { position: relative; width: 100%; max-width: 380px; height: calc(100vh - 180px); background: #0f172a; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 12px 35px rgba(0,0,0,0.6); cursor: pointer; }
+    #canvas-stack { width: 100%; height: 100%; display: block; }
+    .stack-hud { position: absolute; top: 18px; left: 0; right: 0; text-align: center; pointer-events: none; z-index: 10; }
+    .stack-big-score { font-size: 48px; font-weight: 900; color: #fff; text-shadow: 0 4px 20px rgba(0,0,0,0.5); line-height: 1; }
+    .stack-combo { font-size: 13px; font-weight: 800; color: #facc15; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 6px; opacity: 0; transition: opacity 0.2s, transform 0.2s; }
+    .stack-combo.show { opacity: 1; transform: scale(1.1); }
 
   </style>
 </head>
@@ -211,6 +219,15 @@
       <button class="btn-icon" onclick="stopDoodle(); openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
       <div class="game-title">DOODLE JUMP</div>
       <button class="btn-icon" onclick="initDoodle()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
+          <div class="card card-amber" onclick="openScreen('stack')">
+        <div class="card-top">
+          <div class="icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+          </div>
+          <div class="badge" style="color:#fde047;">3D</div>
+        </div>
+        <div><div class="card-title">Stack</div><div class="card-sub" id="best-stack">Рекорд: 0</div></div>
+      </div>
     </div>
     <div class="scores">
       <div class="score-box"><div class="score-label">Счет</div><div class="score-val" id="sdoodle">0</div></div>
@@ -225,22 +242,51 @@
       </div>
     </div>
     <div style="font-size:12px;color:#6b7280;">Жми левую или правую часть экрана</div>
+          
+
+  </div>
+  <!-- ЭКРАН: STACK -->
+  <div id="screen-stack" class="screen game-screen">
+    <div class="top-bar">
+      <button class="btn-icon" onclick="stopStack(); openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
+      <div class="game-title">STACK 3D</div>
+      <button class="btn-icon" onclick="initStack()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
+    </div>
+    <div class="scores">
+      <div class="score-box"><div class="score-label">Этаж</div><div class="score-val" id="sstack">0</div></div>
+      <div class="score-box best"><div class="score-label">Рекорд</div><div class="score-val" id="bstack">0</div></div>
+    </div>
+    <div class="stack-wrap" id="wrap-stack">
+      <div class="stack-hud">
+        <div class="stack-big-score" id="stack-hud-score">0</div>
+        <div class="stack-combo" id="stack-combo">IDEAL x2</div>
+      </div>
+      <canvas id="canvas-stack"></canvas>
+      <div class="overlay" id="over-stack">
+        <h2 style="font-size:26px;font-weight:900;color:#f59e0b;">Башня упала!</h2>
+        <div style="font-size:14px;color:#9ca3af;" id="fstack">Этажей: 0</div>
+        <button class="btn-restart" onclick="initStack()">Строить снова</button>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#6b7280;">Тапай в ритм, чтобы ставить блоки ровно</div>
   </div>
 
     <script>
         const tg = window.Telegram?.WebApp;
     if (tg) { tg.ready(); tg.expand(); }
 
-    function updateMenuScores() {
+        function updateMenuScores() {
       const b1 = Number(localStorage.getItem('pixelplay_2048_best')) || 0;
       const b2 = Number(localStorage.getItem('pixelplay_blocks_best')) || 0;
       const b3 = Number(localStorage.getItem('pixelplay_match_best')) || 0;
       const b4 = Number(localStorage.getItem('pixelplay_doodle_best')) || 0;
+      const b5 = Number(localStorage.getItem('pixelplay_stack_best')) || 0;
       document.getElementById('best-2048').textContent = 'Рекорд: ' + b1;
       document.getElementById('best-blocks').textContent = 'Рекорд: ' + b2;
       document.getElementById('best-match').textContent = 'Рекорд: ' + b3;
       document.getElementById('best-doodle').textContent = 'Рекорд: ' + b4;
-      document.getElementById('total-best').textContent = b1 + b2 + b3 + b4;
+      document.getElementById('best-stack').textContent = 'Рекорд: ' + b5;
+      document.getElementById('total-best').textContent = b1 + b2 + b3 + b4 + b5;
     }
 
     function openScreen(name) {
@@ -251,6 +297,7 @@
       if (name === 'blocks' && boardBlocks.length === 0) initBlocks();
       if (name === 'match' && boardMatch.length === 0) initMatch();
       if (name === 'doodle') initDoodle();
+      if (name === 'stack') initStack();
     }
 
     /* ================= ИГРА 2048 ================= */
@@ -740,6 +787,278 @@
         return;
       }
       doodleAnim = requestAnimationFrame(loopDoodle);
+    }
+    /* ================= STACK 3D ================= */
+    let stackAnim = null, stackScore = 0, stackCombo = 0, stackOver = false;
+    let bestStack = Number(localStorage.getItem('pixelplay_stack_best')) || 0;
+    document.getElementById('bstack').textContent = bestStack;
+
+    const sCanvas = document.getElementById('canvas-stack');
+    const sCtx = sCanvas.getContext('2d');
+    let sBlocks = [], sDebris = [], sParticles = [], sStars = [];
+    let sCurrent = null, sCamY = 0, sTargetCamY = 0, sHue = 260;
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playStackTone(combo) {
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'triangle';
+        const freq = 260 * Math.pow(1.06, Math.min(combo, 24));
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.25);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.25);
+      } catch (e) {}
+    }
+
+    document.getElementById('wrap-stack').addEventListener('pointerdown', e => {
+      if (e.target.closest('.overlay') || stackOver || !sCurrent) return;
+      placeStackBlock();
+    });
+
+    function stopStack() {
+      if (stackAnim) cancelAnimationFrame(stackAnim);
+    }
+
+    function initStack() {
+      stopStack();
+      const wrap = document.getElementById('wrap-stack');
+      sCanvas.width = wrap.clientWidth || 350;
+      sCanvas.height = wrap.clientHeight || 500;
+
+      stackScore = 0; stackCombo = 0; stackOver = false;
+      sHue = Math.floor(Math.random() * 360);
+      document.getElementById('sstack').textContent = 0;
+      document.getElementById('stack-hud-score').textContent = 0;
+      document.getElementById('stack-combo').classList.remove('show');
+      document.getElementById('over-stack').classList.remove('show');
+
+      sStars = Array.from({ length: 45 }, () => ({
+        x: Math.random() * sCanvas.width,
+        y: Math.random() * sCanvas.height,
+        r: Math.random() * 2 + 0.8,
+        speed: Math.random() * 0.4 + 0.1,
+        alpha: Math.random() * 0.6 + 0.2
+      }));
+
+      sBlocks = []; sDebris = []; sParticles = [];
+      const baseW = sCanvas.width * 0.56;
+      const baseX = (sCanvas.width - baseW) / 2;
+
+      for (let i = 0; i < 4; i++) {
+        sBlocks.push({
+          x: baseX, y: sCanvas.height - 90 - i * 24,
+          w: baseW, h: 24, hue: (sHue + i * 6) % 360, glow: 0
+        });
+      }
+
+      sCamY = 0; sTargetCamY = 0;
+      spawnStackBlock();
+      loopStack();
+    }
+
+    function spawnStackBlock() {
+      const prev = sBlocks[sBlocks.length - 1];
+      const dir = stackScore % 2 === 0 ? 1 : -1;
+      const speed = Math.min(3.2 + stackScore * 0.11, 8.5);
+      const startX = dir === 1 ? -prev.w + 20 : sCanvas.width - 20;
+      sCurrent = {
+        x: startX, y: prev.y - 24,
+        w: prev.w, h: 24,
+        vx: dir * speed,
+        hue: (sHue + (stackScore + 4) * 6) % 360
+      };
+    }
+
+    function placeStackBlock() {
+      const prev = sBlocks[sBlocks.length - 1];
+      const delta = sCurrent.x - prev.x;
+      const absDelta = Math.abs(delta);
+
+      if (absDelta >= prev.w) {
+        sDebris.push({ ...sCurrent, vy: 0, rot: 0, vrot: (delta > 0 ? 1 : -1) * 0.08 });
+        sCurrent = null;
+        endStack();
+        return;
+      }
+
+      if (absDelta <= 6) {
+        sCurrent.x = prev.x;
+        stackCombo++;
+        if (stackCombo >= 3) {
+          const grow = Math.min(18, sCanvas.width * 0.65 - sCurrent.w);
+          sCurrent.w += grow;
+          sCurrent.x -= grow / 2;
+        }
+        sCurrent.glow = 1;
+        spawnIdealParticles(sCurrent.x, sCurrent.y, sCurrent.w, sCurrent.hue);
+        playStackTone(stackCombo);
+        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+        const comboEl = document.getElementById('stack-combo');
+        comboEl.textContent = stackCombo > 1 ? `IDEAL x${stackCombo}` : 'IDEAL!';
+        comboEl.classList.add('show');
+      } else {
+        stackCombo = 0;
+        document.getElementById('stack-combo').classList.remove('show');
+        playStackTone(0);
+        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+
+        const overlapW = prev.w - absDelta;
+        let debrisX, debrisW;
+        if (delta > 0) {
+          debrisX = prev.x + prev.w;
+          debrisW = absDelta;
+          sCurrent.x = prev.x + delta;
+        } else {
+          debrisX = sCurrent.x;
+          debrisW = absDelta;
+          sCurrent.x = prev.x;
+        }
+        sCurrent.w = overlapW;
+
+        sDebris.push({
+          x: debrisX, y: sCurrent.y, w: debrisW, h: 24,
+          hue: sCurrent.hue, vy: 0, rot: 0, vrot: (delta > 0 ? 1 : -1) * 0.06
+        });
+      }
+
+      sBlocks.push({ ...sCurrent, glow: sCurrent.glow || 0 });
+      stackScore++;
+      document.getElementById('sstack').textContent = stackScore;
+      document.getElementById('stack-hud-score').textContent = stackScore;
+
+      if (stackScore > bestStack) {
+        bestStack = stackScore;
+        document.getElementById('bstack').textContent = bestStack;
+        localStorage.setItem('pixelplay_stack_best', bestStack);
+      }
+
+      sTargetCamY = stackScore * 24;
+      spawnStackBlock();
+    }
+    function spawnIdealParticles(x, y, w, hue) {
+      for (let i = 0; i < 18; i++) {
+        sParticles.push({
+          x: x + Math.random() * w,
+          y: y + 12,
+          vx: (Math.random() - 0.5) * 5,
+          vy: (Math.random() - 1) * 4,
+          life: 1,
+          color: `hsl(${hue}, 95%, 70%)`
+        });
+      }
+    }
+
+    function drawIsoBlock(ctx, x, y, w, h, hue, glow = 0) {
+      const depth = 12;
+      const grad = ctx.createLinearGradient(x, y, x + w, y + h);
+      grad.addColorStop(0, `hsl(${hue}, 82%, 56%)`);
+      grad.addColorStop(1, `hsl(${(hue + 20) % 360}, 82%, 44%)`);
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, y, w, h);
+
+      ctx.fillStyle = `hsl(${hue}, 90%, 72%)`;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + depth, y - depth * 0.7);
+      ctx.lineTo(x + w + depth, y - depth * 0.7);
+      ctx.lineTo(x + w, y);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = `hsl(${hue}, 75%, 30%)`;
+      ctx.beginPath();
+      ctx.moveTo(x + w, y);
+      ctx.lineTo(x + w + depth, y - depth * 0.7);
+      ctx.lineTo(x + w + depth, y + h - depth * 0.7);
+      ctx.lineTo(x + w, y + h);
+      ctx.closePath();
+      ctx.fill();
+
+      if (glow > 0.01) {
+        ctx.fillStyle = `rgba(255, 255, 255, ${glow * 0.65})`;
+        ctx.fillRect(x - 3, y - 3, w + 6, h + 6);
+      }
+    }
+
+    function endStack() {
+      stackOver = true;
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+      setTimeout(() => {
+        document.getElementById('fstack').textContent = 'Этажей построено: ' + stackScore;
+        document.getElementById('over-stack').classList.add('show');
+      }, 450);
+    }
+
+    function loopStack() {
+      sCamY += (sTargetCamY - sCamY) * 0.12;
+
+      const bgHue = (sHue + stackScore * 3) % 360;
+      const bgGrad = sCtx.createLinearGradient(0, 0, 0, sCanvas.height);
+      bgGrad.addColorStop(0, `hsl(${(bgHue + 40) % 360}, 45%, 10%)`);
+      bgGrad.addColorStop(1, `hsl(${bgHue}, 55%, 18%)`);
+      sCtx.fillStyle = bgGrad;
+      sCtx.fillRect(0, 0, sCanvas.width, sCanvas.height);
+
+      sStars.forEach(st => {
+        st.y += st.speed;
+        if (st.y > sCanvas.height) { st.y = 0; st.x = Math.random() * sCanvas.width; }
+        const drawY = (st.y + sCamY * 0.15) % sCanvas.height;
+        sCtx.fillStyle = `rgba(255, 255, 255, ${st.alpha})`;
+        sCtx.beginPath(); sCtx.arc(st.x, drawY, st.r, 0, Math.PI * 2); sCtx.fill();
+      });
+
+      sCtx.save();
+      sCtx.translate(0, sCamY);
+
+      sBlocks.forEach(b => {
+        if (b.y + sCamY > sCanvas.height + 60) return;
+        if (b.glow > 0) b.glow *= 0.88;
+        drawIsoBlock(sCtx, b.x, b.y, b.w, b.h, b.hue, b.glow);
+      });
+
+      if (sCurrent && !stackOver) {
+        sCurrent.x += sCurrent.vx;
+        if (sCurrent.x + sCurrent.w > sCanvas.width - 10) {
+          sCurrent.x = sCanvas.width - 10 - sCurrent.w;
+          sCurrent.vx *= -1;
+        } else if (sCurrent.x < 10) {
+          sCurrent.x = 10;
+          sCurrent.vx *= -1;
+        }
+        drawIsoBlock(sCtx, sCurrent.x, sCurrent.y, sCurrent.w, sCurrent.h, sCurrent.hue);
+      }
+
+      sDebris.forEach(d => {
+        d.vy += 0.45;
+        d.y += d.vy;
+        d.rot += d.vrot;
+        sCtx.save();
+        sCtx.translate(d.x + d.w / 2, d.y + d.h / 2);
+        sCtx.rotate(d.rot);
+        drawIsoBlock(sCtx, -d.w / 2, -d.h / 2, d.w, d.h, d.hue);
+        sCtx.restore();
+      });
+      sDebris = sDebris.filter(d => d.y + sCamY < sCanvas.height + 150);
+
+      sParticles.forEach(p => {
+        p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.life -= 0.03;
+        sCtx.fillStyle = p.color;
+        sCtx.globalAlpha = Math.max(0, p.life);
+        sCtx.fillRect(p.x, p.y, 4, 4);
+      });
+      sCtx.globalAlpha = 1;
+      sParticles = sParticles.filter(p => p.life > 0);
+
+      sCtx.restore();
+
+      if (!stackOver || sDebris.length > 0 || sParticles.length > 0) {
+        stackAnim = requestAnimationFrame(loopStack);
+      }
     }
 
     updateMenuScores();
