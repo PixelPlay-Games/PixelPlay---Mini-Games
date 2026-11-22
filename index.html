@@ -2107,10 +2107,10 @@
       }
 
       // Отрисовка
-      snCtx.fillStyle = '#090d16';
+      
+              snCtx.fillStyle = '#090d16';
       snCtx.fillRect(0, 0, snCanvas.width, snCanvas.height);
 
-      // Тонкая сетка поля
       snCtx.strokeStyle = 'rgba(132, 204, 22, 0.06)';
       snCtx.lineWidth = 1;
       for (let i = 1; i < SN_GRID; i++) {
@@ -2118,7 +2118,6 @@
         snCtx.beginPath(); snCtx.moveTo(0, i * cell); snCtx.lineTo(snCanvas.width, i * cell); snCtx.stroke();
       }
 
-      // Пульсирующая сфера еды
       const pulse = Math.sin(ts * 0.008) * 2.5;
       const fx = (snFood.x + 0.5) * cell;
       const fy = (snFood.y + 0.5) * cell;
@@ -2127,7 +2126,6 @@
       snCtx.fillStyle = '#f43f5e';
       snCtx.beginPath(); snCtx.arc(fx, fy, cell * 0.3, 0, Math.PI * 2); snCtx.fill();
 
-      // Тело змейки с градиентом от головы к хвосту
       snBody.forEach((seg, idx) => {
         const ratio = 1 - idx / (snBody.length + 2);
         snCtx.fillStyle = idx === 0 ? '#bef264' : `rgba(132, 204, 22, ${0.35 + ratio * 0.65})`;
@@ -2137,7 +2135,6 @@
         snCtx.fill();
       });
 
-      // Искры
       snSparks.forEach(s => {
         s.x += s.vx; s.y += s.vy; s.life -= 0.06;
         snCtx.fillStyle = `rgba(250, 204, 21, ${Math.max(0, s.life)})`;
@@ -2149,65 +2146,6 @@
         snakeAnim = requestAnimationFrame(loopSnake);
       }
     }
-    /* ================= ПРЕМИУМ-КАРТОЧКА GAME OVER ДЛЯ ВСЕХ ИГР ================= */
-    (function enhanceGameOverOverlays() {
-      const scoreMap = {
-        'over-2048':    ['s2048', 'b2048'],
-        'over-blocks':  ['sblocks', 'bblocks'],
-        'over-match':   ['smatch', 'bmatch'],
-        'over-doodle':  ['sdoodle', 'bdoodle'],
-        'over-stack':   ['sstack', 'bstack'],
-        'over-knife':   ['sknife', 'bknife'],
-        'over-flappy':  ['sflappy', 'bflappy'],
-        'over-breaker': ['sbreaker', 'bbreaker'],
-        'over-snake':   ['ssnake', 'bsnake']
-      };
-
-      document.querySelectorAll('.overlay').forEach(ov => {
-        const titleEl = ov.querySelector('h2');
-        const btnEl = ov.querySelector('.btn-restart');
-        if (!titleEl || !btnEl) return;
-
-        const titleText = titleEl.textContent;
-        const restartAttr = btnEl.getAttribute('onclick');
-        const btnText = btnEl.textContent;
-
-        ov.innerHTML = `
-          <div class="over-card">
-            <div class="over-badge" id="${ov.id}-badge">РАУНД ЗАВЕРШЕН</div>
-            <div class="over-title">${titleText}</div>
-            <div class="over-score-box">
-              <div class="over-score-lbl">Твой результат</div>
-              <div class="over-score-num" id="${ov.id}-val">0</div>
-            </div>
-            <button class="btn-restart" onclick="${restartAttr}">${btnText}</button>
-            <button class="btn-home-sub" onclick="openScreen('home')">Выйти в меню</button>
-          </div>
-        `;
-
-        // Автообновление счета и проверка нового рекорда при показе окна
-        const observer = new MutationObserver(() => {
-          if (ov.classList.contains('show') && scoreMap[ov.id]) {
-            const [sId, bId] = scoreMap[ov.id];
-            const cur = Number(document.getElementById(sId)?.textContent) || 0;
-            const best = Number(document.getElementById(bId)?.textContent) || 0;
-            const valEl = document.getElementById(`${ov.id}-val`);
-            const badgeEl = document.getElementById(`${ov.id}-badge`);
-            if (valEl) valEl.textContent = cur.toLocaleString();
-            if (badgeEl) {
-              if (cur > 0 && cur >= best) {
-                badgeEl.textContent = '🏆 НОВЫЙ РЕКОРД!';
-                badgeEl.classList.add('record');
-              } else {
-                badgeEl.textContent = `РЕКОРД: ${best.toLocaleString()}`;
-                badgeEl.classList.remove('record');
-              }
-            }
-          }
-        });
-        observer.observe(ov, { attributes: true, attributeFilter: ['class'] });
-      });
-    })();
 
   </script>
 </body>
