@@ -555,8 +555,20 @@
   <!-- ЭКРАН 3: BLOCK BLAST -->
   <div id="screen-blocks" class="screen game-screen">
     <div class="top-bar">
-      <button class="btn-icon" onclick="openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
-      <div class="game-title">BLOCK BLAST</div>
+      <button class="btn-icon" onclick="openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></<div class="game-header-badge" style="--accent: #8b5cf6;">
+    <span class="badge-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="3" y="3" width="5" height="5" rx="1"/>
+            <rect x="9.5" y="3" width="5" height="5" rx="1"/>
+            <rect x="16" y="3" width="5" height="5" rx="1"/>
+            <rect x="3" y="9.5" width="5" height="5" rx="1"/>
+            <rect x="9.5" y="9.5" width="5" height="5" rx="1"/>
+            <rect x="3" y="16" width="5" height="5" rx="1"/>
+        </svg>
+    </span>
+    <span class="badge-title">Block Blast</span>
+</div>
+
       <button class="btn-icon" onclick="initBlocks()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
     </div>
     <div class="scores">
@@ -602,7 +614,15 @@
   <div id="screen-doodle" class="screen game-screen">
     <div class="top-bar">
       <button class="btn-icon" onclick="stopDoodle(); openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
-      <div class="game-title">DOODLE JUMP</div>
+      <div class="game-header-badge" style="--accent: #10b981;">
+    <span class="badge-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 19V5M5 12l7-7 7 7"/>
+        </svg>
+    </span>
+    <span class="badge-title">Doodle Jump</span>
+</div>
+
       <button class="btn-icon" onclick="initDoodle()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
       
     </div>
@@ -639,7 +659,17 @@
   <div id="screen-stack" class="screen game-screen">
     <div class="top-bar">
       <button class="btn-icon" onclick="stopStack(); openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
-      <div class="game-title">STACK 3D</div>
+   <div class="game-header-badge" style="--accent: #ec4899;">
+    <span class="badge-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="4" y="15" width="16" height="4" rx="1.5"/>
+            <rect x="6" y="10" width="12" height="4" rx="1.5" opacity="0.8"/>
+            <rect x="8" y="5" width="8" height="4" rx="1.5" opacity="0.6"/>
+        </svg>
+    </span>
+    <span class="badge-title">STACK 3D</span>
+</div>
+
       <button class="btn-icon" onclick="initStack()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
     </div>
     <div class="scores">
@@ -676,7 +706,17 @@
   <div id="screen-knife" class="screen game-screen">
     <div class="top-bar">
       <button class="btn-icon" onclick="stopKnife(); openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
-      <div class="game-title">KNIFE HIT</div>
+    <div class="game-header-badge" style="--accent: #f59e0b;">
+    <span class="badge-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.5 17.5L3 6V3h3l11.5 11.5"/>
+            <path d="M13 19l6-6"/>
+            <path d="M16 16l4 4"/>
+        </svg>
+    </span>
+    <span class="badge-title">KNIFE HIT</span>
+</div>
+
       <button class="btn-icon" onclick="initKnife()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
     </div>
     <div class="scores">
@@ -709,7 +749,15 @@
   <div id="screen-flappy" class="screen game-screen">
     <div class="top-bar">
       <button class="btn-icon" onclick="stopFlappy(); openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
-      <div class="game-title">CYBER FLAPPY</div>
+    <div class="game-header-badge" style="--accent: #06b6d4;">
+    <span class="badge-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+        </svg>
+    </span>
+    <span class="badge-title">CYBER FLAPPY</span>
+</div>
+
       <button class="btn-icon" onclick="initFlappy()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
     </div>
     <div class="scores">
@@ -742,7 +790,18 @@
   <div id="screen-breaker" class="screen game-screen">
     <div class="top-bar">
       <button class="btn-icon" onclick="stopBreaker(); openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
-      <div class="game-title">NEON BREAKER</div>
+   <div class="game-header-badge" style="--accent: #a855f7;">
+    <span class="badge-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <rect x="3" y="4" width="8" height="3.5" rx="1"/>
+            <rect x="13" y="4" width="8" height="3.5" rx="1" opacity="0.6"/>
+            <circle cx="12" cy="13" r="2.5"/>
+            <rect x="6" y="18" width="12" height="3" rx="1.5"/>
+        </svg>
+    </span>
+    <span class="badge-title">NEON BREAKER</span>
+</div>
+
       <button class="btn-icon" onclick="initBreaker()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
     </div>
     <div class="scores">
@@ -775,7 +834,15 @@
   <div id="screen-snake" class="screen game-screen">
     <div class="top-bar">
       <button class="btn-icon" onclick="stopSnake(); openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
-      <div class="game-title">NEON SNAKE</div>
+    <div class="game-header-badge" style="--accent: #84cc16;">
+    <span class="badge-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 17h10a4 4 0 0 0 0-8H10a4 4 0 0 1 0-8h10"/>
+        </svg>
+    </span>
+    <span class="badge-title">NEON SNAKE</span>
+</div>
+
       <button class="btn-icon" onclick="initSnake()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
     </div>
     <div class="scores">
