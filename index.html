@@ -95,6 +95,10 @@
     .stack-big-score { font-size: 48px; font-weight: 900; color: #fff; text-shadow: 0 4px 20px rgba(0,0,0,0.5); line-height: 1; }
     .stack-combo { font-size: 13px; font-weight: 800; color: #facc15; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 6px; opacity: 0; transition: opacity 0.2s, transform 0.2s; }
     .stack-combo.show { opacity: 1; transform: scale(1.1); }
+    /* Стили Knife Hit */
+    .card-pink { background: linear-gradient(135deg, #ec4899, #831843); box-shadow: 0 8px 24px rgba(236,72,153,0.35); }
+    .knife-wrap { position: relative; width: 100%; max-width: 380px; height: calc(100vh - 180px); background: radial-gradient(circle at 50% 35%, #1e1b4b, #090d16); border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 12px 35px rgba(0,0,0,0.6); cursor: pointer; }
+    #canvas-knife { width: 100%; height: 100%; display: block; }
 
   </style>
 </head>
@@ -160,6 +164,15 @@
           <div class="badge" style="color:#fde047;">3D</div>
         </div>
         <div><div class="card-title">Stack</div><div class="card-sub" id="best-stack">Рекорд: 0</div></div>
+      </div>
+  <div class="card card-pink" onclick="openScreen('knife')">
+        <div class="card-top">
+          <div class="icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m14.5 17.5-11-11V3h3.5l11 11"/><path d="m13 19 6-6"/><path d="m16 16 4 4"/><path d="m19 21 2-2"/></svg>
+          </div>
+          <div class="badge" style="color:#f9a8d4;">Точность</div>
+        </div>
+        <div><div class="card-title">Knife Hit</div><div class="card-sub" id="best-knife">Рекорд: 0</div></div>
       </div>
 
     </div>
@@ -280,23 +293,46 @@
     </div>
     <div style="font-size:12px;color:#6b7280;">Тапай в ритм, чтобы ставить блоки ровно</div>
   </div>
+      <!-- ЭКРАН: KNIFE HIT -->
+  <div id="screen-knife" class="screen game-screen">
+    <div class="top-bar">
+      <button class="btn-icon" onclick="stopKnife(); openScreen('home')"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
+      <div class="game-title">KNIFE HIT</div>
+      <button class="btn-icon" onclick="initKnife()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
+    </div>
+    <div class="scores">
+      <div class="score-box"><div class="score-label">Очки</div><div class="score-val" id="sknife">0</div></div>
+      <div class="score-box best"><div class="score-label">Рекорд</div><div class="score-val" id="bknife">0</div></div>
+    </div>
+    <div class="knife-wrap" id="wrap-knife">
+      <canvas id="canvas-knife"></canvas>
+      <div class="overlay" id="over-knife">
+        <h2 style="font-size:26px;font-weight:900;color:#ec4899;">Попал в нож!</h2>
+        <div style="font-size:14px;color:#9ca3af;" id="fknife">Счет: 0</div>
+        <button class="btn-restart" onclick="initKnife()">Играть снова</button>
+      </div>
+    </div>
+    <div style="font-size:12px;color:#6b7280;">Тапай, чтобы метать ножи в мишень</div>
+  </div>
 
     <script>
         const tg = window.Telegram?.WebApp;
     if (tg) { tg.ready(); tg.expand(); }
 
-        function updateMenuScores() {
+            function updateMenuScores() {
       const b1 = Number(localStorage.getItem('pixelplay_2048_best')) || 0;
       const b2 = Number(localStorage.getItem('pixelplay_blocks_best')) || 0;
       const b3 = Number(localStorage.getItem('pixelplay_match_best')) || 0;
       const b4 = Number(localStorage.getItem('pixelplay_doodle_best')) || 0;
       const b5 = Number(localStorage.getItem('pixelplay_stack_best')) || 0;
+      const b6 = Number(localStorage.getItem('pixelplay_knife_best')) || 0;
       document.getElementById('best-2048').textContent = 'Рекорд: ' + b1;
       document.getElementById('best-blocks').textContent = 'Рекорд: ' + b2;
       document.getElementById('best-match').textContent = 'Рекорд: ' + b3;
       document.getElementById('best-doodle').textContent = 'Рекорд: ' + b4;
       document.getElementById('best-stack').textContent = 'Рекорд: ' + b5;
-      document.getElementById('total-best').textContent = b1 + b2 + b3 + b4 + b5;
+      document.getElementById('best-knife').textContent = 'Рекорд: ' + b6;
+      document.getElementById('total-best').textContent = b1 + b2 + b3 + b4 + b5 + b6;
     }
 
     function openScreen(name) {
@@ -308,6 +344,7 @@
       if (name === 'match' && boardMatch.length === 0) initMatch();
       if (name === 'doodle') initDoodle();
       if (name === 'stack') initStack();
+      if (name === 'knife') initKnife();
     }
 
     /* ================= ИГРА 2048 ================= */
@@ -1072,6 +1109,180 @@
     }
 
     updateMenuScores();
+            /* ================= KNIFE HIT ================= */
+    let knifeAnim = null, knifeScore = 0, knifeStage = 1, knifeOver = false;
+    let bestKnife = Number(localStorage.getItem('pixelplay_knife_best')) || 0;
+    document.getElementById('bknife').textContent = bestKnife;
+
+    const kCanvas = document.getElementById('canvas-knife');
+    const kCtx = kCanvas.getContext('2d');
+    let kAngle = 0, kSpeed = 0.035, kStuck = [], kFlying = null, kKnivesLeft = 7;
+    let kHitOffset = 0, kSparks = [], kTimer = 0;
+
+    document.getElementById('wrap-knife').addEventListener('pointerdown', e => {
+      if (e.target.closest('.overlay') || knifeOver || kFlying || kKnivesLeft <= 0) return;
+      kFlying = { y: kCanvas.height - 95, vy: -26 };
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+    });
+
+    function stopKnife() {
+      if (knifeAnim) cancelAnimationFrame(knifeAnim);
+    }
+
+    function initKnife() {
+      stopKnife();
+      const wrap = document.getElementById('wrap-knife');
+      kCanvas.width = wrap.clientWidth || 350;
+      kCanvas.height = wrap.clientHeight || 500;
+      knifeScore = 0; knifeStage = 1; knifeOver = false;
+      document.getElementById('sknife').textContent = 0;
+      document.getElementById('over-knife').classList.remove('show');
+      setupKnifeStage();
+      loopKnife();
+    }
+
+    function setupKnifeStage() {
+      kAngle = 0; kFlying = null; kHitOffset = 0; kSparks = []; kTimer = 0;
+      kKnivesLeft = Math.min(6 + Math.floor(knifeStage / 2), 11);
+      kStuck = [];
+      const pre = Math.min(Math.floor(knifeStage / 2), 3);
+      for (let i = 0; i < pre; i++) kStuck.push((Math.PI * 2 / pre) * i);
+    }
+
+    function spawnKnifeSparks(x, y, color) {
+      for (let i = 0; i < 14; i++) {
+        kSparks.push({
+          x, y,
+          vx: (Math.random() - 0.5) * 8,
+          vy: (Math.random() - 0.2) * 7,
+          life: 1, color
+        });
+      }
+    }
+
+    function drawKnifeShape(ctx, x, y, angle = 0) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.fillStyle = '#e2e8f0';
+      ctx.beginPath();
+      ctx.moveTo(0, -32);
+      ctx.lineTo(6, -8);
+      ctx.lineTo(-6, -8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = '#ec4899';
+      ctx.fillRect(-10, -8, 20, 4);
+      ctx.fillStyle = '#475569';
+      ctx.fillRect(-4, -4, 8, 22);
+      ctx.restore();
+    }
+    function loopKnife() {
+      const cx = kCanvas.width / 2;
+      const cy = kCanvas.height * 0.34;
+      const radius = 56;
+      kTimer += 0.02;
+
+      const baseSpd = 0.032 + Math.min(knifeStage * 0.004, 0.035);
+      if (knifeStage % 2 === 0) {
+        kSpeed = Math.sin(kTimer * 1.4) * (baseSpd * 1.35);
+      } else {
+        kSpeed = baseSpd * (knifeStage % 3 === 0 ? -1 : 1);
+      }
+      kAngle = (kAngle + kSpeed) % (Math.PI * 2);
+      kHitOffset *= 0.75;
+
+      if (kFlying) {
+        kFlying.y += kFlying.vy;
+        if (kFlying.y <= cy + radius + 24) {
+          const hitAngle = (Math.PI / 2 - kAngle + Math.PI * 4) % (Math.PI * 2);
+          const collision = kStuck.some(a => {
+            let diff = Math.abs(a - hitAngle);
+            if (diff > Math.PI) diff = Math.PI * 2 - diff;
+            return diff < 0.23;
+          });
+
+          if (collision) {
+            knifeOver = true;
+            spawnKnifeSparks(cx, cy + radius + 15, '#f43f5e');
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+            setTimeout(() => {
+              document.getElementById('fknife').textContent = `Этаж ${knifeStage} • Счет: ${knifeScore}`;
+              document.getElementById('over-knife').classList.add('show');
+            }, 350);
+          } else {
+            kStuck.push(hitAngle);
+            kFlying = null;
+            kKnivesLeft--;
+            kHitOffset = -10;
+            knifeScore += 10;
+            document.getElementById('sknife').textContent = knifeScore;
+            if (knifeScore > bestKnife) {
+              bestKnife = knifeScore;
+              document.getElementById('bknife').textContent = bestKnife;
+              localStorage.setItem('pixelplay_knife_best', bestKnife);
+            }
+            spawnKnifeSparks(cx, cy + radius, '#38bdf8');
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+
+            if (kKnivesLeft <= 0) {
+              knifeStage++;
+              knifeScore += 50;
+              document.getElementById('sknife').textContent = knifeScore;
+              setTimeout(setupKnifeStage, 350);
+            }
+          }
+        }
+      }
+
+      kCtx.clearRect(0, 0, kCanvas.width, kCanvas.height);
+      const targetY = cy + kHitOffset;
+
+      kStuck.forEach(a => {
+        const totalA = a + kAngle;
+        const kx = cx + Math.cos(totalA) * (radius + 14);
+        const ky = targetY + Math.sin(totalA) * (radius + 14);
+        drawKnifeShape(kCtx, kx, ky, totalA - Math.PI / 2);
+      });
+
+      const grad = kCtx.createRadialGradient(cx, targetY, 10, cx, targetY, radius);
+      grad.addColorStop(0, '#a855f7');
+      grad.addColorStop(0.7, '#3b82f6');
+      grad.addColorStop(1, '#1e1b4b');
+      kCtx.fillStyle = grad;
+      kCtx.beginPath(); kCtx.arc(cx, targetY, radius, 0, Math.PI * 2); kCtx.fill();
+      kCtx.lineWidth = 4;
+      kCtx.strokeStyle = '#ec4899';
+      kCtx.stroke();
+
+      kCtx.fillStyle = '#fff';
+      kCtx.font = '900 22px Montserrat, sans-serif';
+      kCtx.textAlign = 'center';
+      kCtx.textBaseline = 'middle';
+      kCtx.fillText(`LVL ${knifeStage}`, cx, targetY);
+
+      if (kFlying) drawKnifeShape(kCtx, cx, kFlying.y, 0);
+      else if (kKnivesLeft > 0 && !knifeOver) drawKnifeShape(kCtx, cx, kCanvas.height - 95, 0);
+
+      for (let i = 0; i < kKnivesLeft; i++) {
+        kCtx.fillStyle = '#ec4899';
+        kCtx.fillRect(22, kCanvas.height - 45 - i * 16, 18, 5);
+      }
+
+      kSparks.forEach(s => {
+        s.x += s.vx; s.y += s.vy; s.vy += 0.3; s.life -= 0.04;
+        kCtx.fillStyle = s.color;
+        kCtx.globalAlpha = Math.max(0, s.life);
+        kCtx.fillRect(s.x, s.y, 4, 4);
+      });
+      kCtx.globalAlpha = 1;
+      kSparks = kSparks.filter(s => s.life > 0);
+
+      if (!knifeOver || kSparks.length > 0) {
+        knifeAnim = requestAnimationFrame(loopKnife);
+      }
+    }
+
   </script>
 </body>
 </html>
