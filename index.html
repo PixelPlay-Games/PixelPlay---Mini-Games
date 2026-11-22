@@ -431,15 +431,17 @@ canvas {
 .pixel-coin {
   display: inline-flex; align-items: center; justify-content: center;
   width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
-  background: linear-gradient(135deg, #fde047, #f59e0b);
-  border: 1.5px solid #fef08a;
-  box-shadow: 0 0 10px rgba(250, 204, 21, 0.55);
-  font-size: 10px; font-weight: 900; color: #451a03;
+  background: radial-gradient(circle at 30% 30%, #fef08a, #f59e0b 70%, #b45309);
+  border: 1.5px solid #fde047;
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.6), inset 0 0 3px #fff;
+  position: relative;
 }
-.pixel-coin::after { content: "P"; }
-/* Если захочешь картинку: раскомментируй 2 строки ниже */
-/* .pixel-coin { background: url('coin.png') center/cover no-repeat; border: none; } */
-/* .pixel-coin::after { content: ""; } */
+.pixel-coin::after {
+  content: ""; width: 6px; height: 6px;
+  background: #fef9c3; transform: rotate(45deg);
+  box-shadow: 0 0 4px #fff;
+}
+
 
 .header-badges { display: flex; align-items: center; gap: 8px; }
 .coin-pill {
@@ -658,17 +660,20 @@ canvas {
   <div class="booster-hint" id="hint-2048">Свайпай в любую сторону</div>
   <div class="boosters-2048">
     <button class="booster-btn" id="btn-undo" onclick="useBooster2048('undo')">
-      <span style="font-size:18px;">↩️</span>
+     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
+
       <span class="b-name">Назад</span>
       <span class="b-cost"><span class="pixel-coin"></span>25</span>
     </button>
     <button class="booster-btn" id="btn-smash" onclick="useBooster2048('smash')">
-      <span style="font-size:18px;">🔨</span>
+ <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f43f5e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 12-8.5 8.5c-.83.83-2.17.83-3 0 0 0 0 0 0 0a2.12 2.12 0 0 1 0-3L12 9"/><path d="M17.64 15 22 10.64"/><path d="m20.91 11.7-1.25-1.25c-.6-.6-.93-1.4-.93-2.25v-.86L16.01 4.6a5.56 5.56 0 0 0-3.94-1.64H9l.92.82A6.18 6.18 0 0 1 12 8.4v1.56l2 2h2.47l2.26 1.91"/></svg>
+
       <span class="b-name">Молоток</span>
       <span class="b-cost"><span class="pixel-coin"></span>50</span>
     </button>
     <button class="booster-btn" id="btn-double" onclick="useBooster2048('double')">
-      <span style="font-size:18px;">⚡</span>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+
       <span class="b-name">Улучшить</span>
       <span class="b-cost"><span class="pixel-coin"></span>75</span>
     </button>
