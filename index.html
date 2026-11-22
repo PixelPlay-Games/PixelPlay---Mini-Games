@@ -97,9 +97,78 @@
     .score-label { font-size: 11px; text-transform: uppercase; color: #9ca3af; letter-spacing: 1px; display: flex; align-items: center; gap: 5px; }
     .score-val { font-size: 22px; font-weight: 800; margin-top: 2px; }
     .board-wrap { position: relative; width: 100%; max-width: 380px; aspect-ratio: 1/1; background: #141625; border-radius: 24px; padding: 11px; border: 1px solid rgba(255,255,255,0.09); box-shadow: 0 12px 35px rgba(0,0,0,0.55); }
-    .overlay { position: absolute; inset: 0; background: rgba(11,12,20,0.9); backdrop-filter: blur(8px); border-radius: 24px; display: none; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 50; }
+       .overlay {
+      position: absolute; inset: 0; padding: 24px;
+      background: rgba(9, 11, 20, 0.82);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      border-radius: 24px; display: none; flex-direction: column;
+      align-items: center; justify-content: center; z-index: 50;
+      animation: fadeInOver 0.25s ease-out;
+    }
     .overlay.show { display: flex; }
-    .btn-restart { padding: 14px 28px; border-radius: 16px; border: none; background: linear-gradient(90deg, #a855f7, #3b82f6); color: #fff; font-size: 16px; font-weight: 800; cursor: pointer; }
+    @keyframes fadeInOver {
+      from { opacity: 0; transform: scale(0.94); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .over-card {
+      width: 100%; max-width: 280px;
+      background: linear-gradient(160deg, rgba(30, 34, 58, 0.95), rgba(15, 17, 30, 0.98));
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), inset 0 1px 1px rgba(255, 255, 255, 0.25);
+      border-radius: 26px; padding: 24px 20px;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      animation: popCard 0.32s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popCard {
+      0% { transform: scale(0.82) translateY(14px); opacity: 0; }
+      100% { transform: scale(1) translateY(0); opacity: 1; }
+    }
+
+    .over-badge {
+      font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;
+      padding: 5px 12px; border-radius: 20px; margin-bottom: 12px;
+      background: rgba(244, 63, 94, 0.16); color: #fb7185;
+      border: 1px solid rgba(244, 63, 94, 0.35);
+    }
+    .over-badge.record {
+      background: linear-gradient(90deg, rgba(250, 204, 21, 0.22), rgba(245, 158, 11, 0.22));
+      color: #fde047; border-color: rgba(250, 204, 21, 0.5);
+      box-shadow: 0 0 18px rgba(250, 204, 21, 0.25);
+    }
+
+    .over-title {
+      font-size: 22px; font-weight: 900; color: #fff; margin-bottom: 14px;
+      letter-spacing: 0.3px;
+    }
+    .over-score-box {
+      width: 100%; background: rgba(0, 0, 0, 0.32);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px; padding: 12px; margin-bottom: 18px;
+    }
+    .over-score-lbl { font-size: 10px; text-transform: uppercase; letter-spacing: 1.2px; color: #9ca3af; font-weight: 700; }
+    .over-score-num {
+      font-size: 34px; font-weight: 900; margin-top: 2px;
+      background: linear-gradient(180deg, #ffffff 20%, #c4b5fd 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+
+    .btn-restart {
+      width: 100%; padding: 14px 20px; border-radius: 16px; border: none;
+      background: linear-gradient(90deg, #9333ea, #3b82f6);
+      box-shadow: 0 8px 22px rgba(147, 51, 234, 0.45), inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      color: #fff; font-size: 15px; font-weight: 800; cursor: pointer;
+      transition: transform 0.15s;
+    }
+    .btn-restart:active { transform: scale(0.96); }
+
+    .btn-home-sub {
+      margin-top: 10px; background: transparent; border: none;
+      color: #9ca3af; font-size: 12px; font-weight: 700; cursor: pointer;
+      padding: 6px 12px;
+    }
+    .btn-home-sub:active { color: #fff; }
+
 
     /* Стили 2048 */
     .grid-2048 { display: grid; grid-template-columns: repeat(4, 1fr); grid-template-rows: repeat(4, 1fr); gap: 10px; width: 100%; height: 100%; }
@@ -2044,6 +2113,65 @@
         snakeAnim = requestAnimationFrame(loopSnake);
       }
     }
+    /* ================= ПРЕМИУМ-КАРТОЧКА GAME OVER ДЛЯ ВСЕХ ИГР ================= */
+    (function enhanceGameOverOverlays() {
+      const scoreMap = {
+        'over-2048':    ['s2048', 'b2048'],
+        'over-blocks':  ['sblocks', 'bblocks'],
+        'over-match':   ['smatch', 'bmatch'],
+        'over-doodle':  ['sdoodle', 'bdoodle'],
+        'over-stack':   ['sstack', 'bstack'],
+        'over-knife':   ['sknife', 'bknife'],
+        'over-flappy':  ['sflappy', 'bflappy'],
+        'over-breaker': ['sbreaker', 'bbreaker'],
+        'over-snake':   ['ssnake', 'bsnake']
+      };
+
+      document.querySelectorAll('.overlay').forEach(ov => {
+        const titleEl = ov.querySelector('h2');
+        const btnEl = ov.querySelector('.btn-restart');
+        if (!titleEl || !btnEl) return;
+
+        const titleText = titleEl.textContent;
+        const restartAttr = btnEl.getAttribute('onclick');
+        const btnText = btnEl.textContent;
+
+        ov.innerHTML = `
+          <div class="over-card">
+            <div class="over-badge" id="${ov.id}-badge">РАУНД ЗАВЕРШЕН</div>
+            <div class="over-title">${titleText}</div>
+            <div class="over-score-box">
+              <div class="over-score-lbl">Твой результат</div>
+              <div class="over-score-num" id="${ov.id}-val">0</div>
+            </div>
+            <button class="btn-restart" onclick="${restartAttr}">${btnText}</button>
+            <button class="btn-home-sub" onclick="openScreen('home')">Выйти в меню</button>
+          </div>
+        `;
+
+        // Автообновление счета и проверка нового рекорда при показе окна
+        const observer = new MutationObserver(() => {
+          if (ov.classList.contains('show') && scoreMap[ov.id]) {
+            const [sId, bId] = scoreMap[ov.id];
+            const cur = Number(document.getElementById(sId)?.textContent) || 0;
+            const best = Number(document.getElementById(bId)?.textContent) || 0;
+            const valEl = document.getElementById(`${ov.id}-val`);
+            const badgeEl = document.getElementById(`${ov.id}-badge`);
+            if (valEl) valEl.textContent = cur.toLocaleString();
+            if (badgeEl) {
+              if (cur > 0 && cur >= best) {
+                badgeEl.textContent = '🏆 НОВЫЙ РЕКОРД!';
+                badgeEl.classList.add('record');
+              } else {
+                badgeEl.textContent = `РЕКОРД: ${best.toLocaleString()}`;
+                badgeEl.classList.remove('record');
+              }
+            }
+          }
+        });
+        observer.observe(ov, { attributes: true, attributeFilter: ['class'] });
+      });
+    })();
 
   </script>
 </body>
