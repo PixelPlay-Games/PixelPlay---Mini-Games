@@ -4,7 +4,8 @@
     <title>PixelPlay — Mini Games</title>
   <script src="https://telegram.org"></script>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
   <title>PixelPlay — Mini Games</title>
   <link href="https://googleapis.com" rel="stylesheet">
   <style>
@@ -360,6 +361,22 @@
 .game-screen {
     justify-content: flex-start !important;
     padding-top: 64px !important;
+}
+html, body {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: manipulation !important;
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+}
+
+canvas {
+    touch-action: none !important;
 }
 
   </style>
