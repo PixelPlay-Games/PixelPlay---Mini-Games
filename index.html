@@ -103,10 +103,45 @@
     .card-indigo { background: linear-gradient(135deg, #6366f1, #312e81); box-shadow: 0 8px 24px rgba(99,102,241,0.35); }
     .flappy-wrap { position: relative; width: 100%; max-width: 380px; height: calc(100vh - 180px); background: #090d16; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.12); box-shadow: 0 12px 35px rgba(0,0,0,0.6); cursor: pointer; }
     #canvas-flappy { width: 100%; height: 100%; display: block; }
+    /* Живой неоновый фон хаба */
+    .bg-fx {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden;
+      background: radial-gradient(circle at 50% 0%, #17153b 0%, #0b0c14 70%);
+    }
+    .bg-grid {
+      position: absolute; inset: 0;
+      background-image: 
+        linear-gradient(rgba(168, 85, 247, 0.06) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59, 130, 246, 0.06) 1px, transparent 1px);
+      background-size: 36px 36px;
+      mask-image: radial-gradient(ellipse at 50% 35%, #000 35%, transparent 85%);
+      -webkit-mask-image: radial-gradient(ellipse at 50% 35%, #000 35%, transparent 85%);
+    }
+    .bg-orb {
+      position: absolute; border-radius: 50%; filter: blur(65px); opacity: 0.45;
+      animation: floatOrb 14s ease-in-out infinite alternate;
+    }
+    .orb-1 { width: 260px; height: 260px; background: #7c3aed; top: -60px; left: -60px; }
+    .orb-2 { width: 240px; height: 240px; background: #2563eb; bottom: 12%; right: -70px; animation-delay: -5s; }
+    .orb-3 { width: 200px; height: 200px; background: #10b981; top: 45%; left: 20%; opacity: 0.25; animation-delay: -9s; }
+    @keyframes floatOrb {
+      0% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(25px, 35px) scale(1.12); }
+      100% { transform: translate(-20px, 15px) scale(0.95); }
+    }
+    .screen { position: relative; z-index: 1; }
 
   </style>
 </head>
 <body>
+      <!-- ЖИВОЙ ФОН -->
+  <div class="bg-fx">
+    <div class="bg-orb orb-1"></div>
+    <div class="bg-orb orb-2"></div>
+    <div class="bg-orb orb-3"></div>
+    <div class="bg-grid"></div>
+  </div>
+
   <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ -->
   <div id="screen-home" class="screen active">
     <div class="header">
@@ -1481,6 +1516,29 @@
       document.getElementById('fflappy').textContent = 'Счет: ' + flappyScore;
       document.getElementById('over-flappy').classList.add('show');
     }
+    /* ================= ЧАСТИЦЫ НА ФОНЕ ================= */
+    (function initBgParticles() {
+      const fx = document.querySelector('.bg-fx');
+      if (!fx) return;
+      const colors = ['#a855f7', '#3b82f6', '#10b981', '#ec4899'];
+      for (let i = 0; i < 22; i++) {
+        const dot = document.createElement('div');
+        const size = Math.random() * 4 + 2;
+        dot.style.cssText = `
+          position: absolute;
+          width: ${size}px; height: ${size}px;
+          background: ${colors[i % colors.length]};
+          border-radius: 50%;
+          left: ${Math.random() * 100}%;
+          top: ${Math.random() * 100}%;
+          opacity: ${Math.random() * 0.5 + 0.2};
+          box-shadow: 0 0 8px ${colors[i % colors.length]};
+          animation: floatOrb ${8 + Math.random() * 10}s ease-in-out infinite alternate;
+          animation-delay: -${Math.random() * 10}s;
+        `;
+        fx.appendChild(dot);
+      }
+    })();
 
   </script>
 </body>
