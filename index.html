@@ -353,18 +353,11 @@
     white-space: nowrap;
 }
 
-/* 3. Отступ под нижнее меню и вывод шапки из-под шторки Telegram */
-#screen-home {
-    padding-bottom: 120px !important;
-}
-#screen-2048, #screen-blast, #screen-doodle, #screen-stack, #screen-knife, #screen-flappy, #screen-breaker, #screen-snake,
-.game-screen {
-    justify-content: flex-start !important;
-    padding-top: 16px !important;
-}
+/* 3. Жесткая фиксация окна против ползания в iOS Telegram */
 html, body {
-    
-    
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
     overscroll-behavior: none !important;
     touch-action: manipulation !important;
     -webkit-user-select: none !important;
@@ -372,9 +365,45 @@ html, body {
     -webkit-touch-callout: none !important;
 }
 
+.screen {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Главный экран скроллится внутри себя плавно и без перекрытия нижним меню */
+#screen-home {
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    padding-bottom: 120px !important;
+}
+
+/* Все экраны игр намертво зафиксированы и не ползают при тапах */
+.game-screen {
+    justify-content: flex-start !important;
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+    overflow: hidden !important;
+    touch-action: none !important;
+}
+
+.game-screen .top-bar,
+.game-screen .scores {
+    flex-shrink: 0 !important;
+}
+
+/* Поля с canvas подстраиваются под остаток высоты без выталкивания экрана */
+.doodle-wrap, .stack-wrap, .knife-wrap, .flappy-wrap, .breaker-wrap {
+    height: auto !important;
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+}
+
 canvas {
     touch-action: none !important;
 }
+
 
   </style>
 </head>
