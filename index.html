@@ -427,6 +427,67 @@ canvas {
     margin-top: -32px !important;
     padding-bottom: 24px !important;
 }
+/* === PIXEL COIN (настраивается здесь) === */
+.pixel-coin {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #fde047, #f59e0b);
+  border: 1.5px solid #fef08a;
+  box-shadow: 0 0 10px rgba(250, 204, 21, 0.55);
+  font-size: 10px; font-weight: 900; color: #451a03;
+}
+.pixel-coin::after { content: "P"; }
+/* Если захочешь картинку: раскомментируй 2 строки ниже */
+/* .pixel-coin { background: url('coin.png') center/cover no-repeat; border: none; } */
+/* .pixel-coin::after { content: ""; } */
+
+.header-badges { display: flex; align-items: center; gap: 8px; }
+.coin-pill {
+  background: rgba(250, 204, 21, 0.12); padding: 7px 12px; border-radius: 20px;
+  font-size: 13px; font-weight: 800; color: #fde047;
+  display: flex; align-items: center; gap: 6px;
+  border: 1px solid rgba(250, 204, 21, 0.4);
+}
+/* === БУСТЕРЫ 2048 === */
+.boosters-2048 {
+  width: 100%; max-width: 380px; margin-top: 12px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+}
+.booster-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 16px; padding: 10px 6px; color: #fff;
+  display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer; transition: transform 0.15s, border-color 0.2s, background 0.2s;
+}
+.booster-btn:active { transform: scale(0.95); }
+.booster-btn.active {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: #60a5fa;
+  box-shadow: 0 0 16px rgba(59, 130, 246, 0.45);
+}
+.booster-btn.no-funds { border-color: #f43f5e; animation: shake 0.25s ease; }
+.b-name { font-size: 11px; font-weight: 800; }
+.b-cost { display: flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 800; color: #fde047; }
+.b-cost .pixel-coin { width: 14px; height: 14px; font-size: 8px; }
+/* Подсветка доступных клеток при активном бустере */
+.c2048.targetable {
+  cursor: pointer;
+  box-shadow: inset 0 0 0 2px #60a5fa, 0 0 12px rgba(96, 165, 250, 0.5);
+  animation: pulseTarget 1s infinite alternate;
+}
+@keyframes pulseTarget { from { transform: scale(0.96); } to { transform: scale(1.03); } }
+
+.booster-hint {
+  font-size: 12px; color: #93c5fd; font-weight: 700;
+  margin-top: 8px; min-height: 16px; text-align: center;
+}
+.reward-pill {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(250, 204, 21, 0.15); border: 1px solid rgba(250, 204, 21, 0.4);
+  padding: 5px 12px; border-radius: 12px; margin-top: 8px;
+  font-size: 13px; font-weight: 800; color: #fde047;
+}
 
   </style>
 </head>
@@ -440,13 +501,22 @@ canvas {
   </div>
 
   <!-- ЭКРАН 1: ГЛАВНОЕ МЕНЮ -->
-  <div id="screen-home" class="screen active">      <div class="header">
-        <div class="logo">PIXEL<span>PLAY</span></div>
-        <div class="balance">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#facc15" stroke-width="2.5"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
-          <span id="total-best">0</span>
-        </div>
+
+<div id="screen-home" class="screen active">
+    <div class="header">
+    <div class="logo">PIXEL<span>PLAY</span></div>
+    <div class="header-badges">
+      <div class="coin-pill">
+        <span class="pixel-coin"></span>
+        <span id="coin-balance">100</span>
       </div>
+      <div class="balance">
+        <span>🏆</span>
+        <span id="total-best">0</span>
+      </div>
+    </div>
+  </div>
+
 
     <div class="section-title">Мини-игры</div>
     <div class="grid-menu">
@@ -585,7 +655,29 @@ canvas {
 </div>
 
     </div>
-    <div style="font-size:12px;color:#6b7280;">Свайпай в любую сторону</div>
+  <div class="booster-hint" id="hint-2048">Свайпай в любую сторону</div>
+  <div class="boosters-2048">
+    <button class="booster-btn" id="btn-undo" onclick="useBooster2048('undo')">
+      <span style="font-size:18px;">↩️</span>
+      <span class="b-name">Назад</span>
+      <span class="b-cost"><span class="pixel-coin"></span>25</span>
+    </button>
+    <button class="booster-btn" id="btn-smash" onclick="useBooster2048('smash')">
+      <span style="font-size:18px;">🔨</span>
+      <span class="b-name">Молоток</span>
+      <span class="b-cost"><span class="pixel-coin"></span>50</span>
+    </button>
+    <button class="booster-btn" id="btn-double" onclick="useBooster2048('double')">
+      <span style="font-size:18px;">⚡</span>
+      <span class="b-name">Улучшить</span>
+      <span class="b-cost"><span class="pixel-coin"></span>75</span>
+    </button>
+  </div>
+  <div class="coin-pill" style="margin-top:10px;">
+    <span class="pixel-coin"></span>
+    <span id="coin-balance-2048">100</span>
+  </div>
+
   </div>
 
   <!-- ЭКРАН 3: BLOCK BLAST -->
@@ -912,6 +1004,44 @@ canvas {
 
     <script>
         const tg = window.Telegram?.WebApp;
+            /* === КОШЕЛЁК PIXELCOINS === */
+    let pixelCoins = localStorage.getItem('pixelplay_coins') === null
+      ? 100 : Number(localStorage.getItem('pixelplay_coins'));
+
+    function updateCoinsUI() {
+      localStorage.setItem('pixelplay_coins', pixelCoins);
+      ['coin-balance', 'coin-balance-2048'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = pixelCoins;
+      });
+    }
+    updateCoinsUI();
+
+    // Авто-награда при открытии любого окна Game Over
+    const overObserver = new MutationObserver(muts => {
+      muts.forEach(m => {
+        const ov = m.target;
+        if (ov.classList.contains('show') && !ov.dataset.rewarded) {
+          ov.dataset.rewarded = '1';
+          const numEl = ov.querySelector('.over-score-num');
+          const score = parseInt((numEl?.textContent || '0').replace(/\D/g, '')) || 0;
+          const reward = Math.max(5, Math.floor(score / 15));
+          pixelCoins += reward;
+          updateCoinsUI();
+          let badge = ov.querySelector('.reward-pill');
+          if (!badge && numEl) {
+            badge = document.createElement('div');
+            badge.className = 'reward-pill';
+            numEl.after(badge);
+          }
+          if (badge) badge.innerHTML = `+<span class="pixel-coin"></span> ${reward}`;
+        } else if (!ov.classList.contains('show')) {
+          delete ov.dataset.rewarded;
+        }
+      });
+    });
+    document.querySelectorAll('.overlay').forEach(el => overObserver.observe(el, { attributes: true, attributeFilter: ['class'] }));
+
             if (tg) {
             tg.ready();
             tg.expand();
@@ -962,12 +1092,15 @@ canvas {
 
     /* ================= ИГРА 2048 ================= */
     let board2048 = [], score2048 = 0;
+        
     let best2048 = Number(localStorage.getItem('pixelplay_2048_best')) || 0;
     document.getElementById('b2048').textContent = best2048;
 
     function init2048() {
       board2048 = Array(4).fill(0).map(() => Array(4).fill(0));
       score2048 = 0;
+              prev2048State = null; activeBooster2048 = null;
+
       document.getElementById('s2048').textContent = 0;
       document.getElementById('over-2048').classList.remove('show');
       addTile2048(); addTile2048(); render2048();
@@ -982,13 +1115,28 @@ canvas {
       }
     }
 
-    function render2048() {
+        function render2048() {
       const g = document.getElementById('grid-2048'); g.innerHTML = '';
       for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) {
         const v = board2048[r][c], d = document.createElement('div');
-        d.className = 'c2048' + (v ? ' v-' + (v <= 2048 ? v : 2048) + ' tile-pop' : '');
+        d.className = 'c2048' + (v ? ' v-' + v : '');
         d.textContent = v || ''; g.appendChild(d);
+        if (activeBooster2048 && v > 0) {
+          d.classList.add('targetable');
+          d.onclick = () => {
+            pixelCoins -= BOOSTER_COST[activeBooster2048]; updateCoinsUI();
+            if (activeBooster2048 === 'smash') board2048[r][c] = 0;
+            if (activeBooster2048 === 'double') board2048[r][c] *= 2;
+            activeBooster2048 = null;
+            if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('heavy');
+            render2048();
+          };
+        }
       }
+      ['smash', 'double'].forEach(t => document.getElementById('btn-' + t)?.classList.toggle('active', activeBooster2048 === t));
+      const hint = document.getElementById('hint-2048');
+      if (hint) hint.textContent = activeBooster2048 === 'smash' ? 'Нажми на плитку, чтобы удалить'
+        : activeBooster2048 === 'double' ? 'Нажми на плитку, чтобы удвоить' : 'Свайпай в любую сторону';
     }
 
     function slide2048(row) {
@@ -999,9 +1147,38 @@ canvas {
       while (arr.length < 4) arr.push(0);
       return arr;
     }
+    let prev2048State = null, activeBooster2048 = null;
+    const BOOSTER_COST = { undo: 25, smash: 50, double: 75 };
+
+    function useBooster2048(type) {
+      if (activeBooster2048 === type) {
+        activeBooster2048 = null; render2048(); return;
+      }
+      const cost = BOOSTER_COST[type];
+      const btn = document.getElementById('btn-' + type);
+      if (pixelCoins < cost || (type === 'undo' && !prev2048State)) {
+        btn.classList.remove('no-funds'); void btn.offsetWidth; btn.classList.add('no-funds');
+        if (tg?.HapticFeedback) tg.HapticFeedback.notificationOccurred('error');
+        return;
+      }
+      if (type === 'undo') {
+        pixelCoins -= cost; updateCoinsUI();
+        board2048 = prev2048State.board; score2048 = prev2048State.score;
+        prev2048State = null; document.getElementById('s2048').textContent = score2048;
+        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('medium');
+        render2048(); return;
+      }
+      activeBooster2048 = type;
+      if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+      render2048();
+    }
+      
 
     function move2048(dir) {
       let prev = JSON.stringify(board2048);
+        const snap2048 = { board: JSON.parse(prev), score: score2048 };
+                
+
       if (dir === 'left' || dir === 'right') {
         for (let r = 0; r < 4; r++) {
           let row = dir === 'right' ? [...board2048[r]].reverse() : [...board2048[r]];
@@ -1015,6 +1192,7 @@ canvas {
         }
       }
       if (prev !== JSON.stringify(board2048)) {
+          prev2048State = snap2048; activeBooster2048 = null;
         addTile2048(); document.getElementById('s2048').textContent = score2048;
         if (score2048 > best2048) {
           best2048 = score2048; document.getElementById('b2048').textContent = best2048;
