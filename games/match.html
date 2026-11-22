@@ -119,6 +119,8 @@
       document.getElementById('smatch').textContent = 0;
       document.getElementById('mmatch').textContent = 30;
       document.getElementById('over-match').classList.remove('show');
+      document.getElementById('over-match').style.display = 'none';
+
       renderMatch();
     }
 
@@ -211,6 +213,8 @@
       if (movesMatch <= 0) {
         document.getElementById('fmatch').textContent = scoreMatch;
         document.getElementById('over-match').classList.add('show');
+        document.getElementById('over-match').style.display = 'flex';
+
       }
     }
 
