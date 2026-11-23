@@ -1249,17 +1249,13 @@ canvas {
       const b7 = Number(localStorage.getItem('pixelplay_flappy_best')) || 0;
       const b8 = Number(localStorage.getItem('pixelplay_breaker_best')) || 0;
       const b9 = Number(localStorage.getItem('pixelplay_snake_best')) || 0;
-      document.getElementById('best-2048').textContent = 'Рекорд: ' + b1;
-      document.getElementById('best-blocks').textContent = 'Рекорд: ' + b2;
-      document.getElementById('best-match').textContent = 'Рекорд: ' + b3;
-      document.getElementById('best-doodle').textContent = 'Рекорд: ' + b4;
-      document.getElementById('best-stack').textContent = 'Рекорд: ' + b5;
-      document.getElementById('best-knife').textContent = 'Рекорд: ' + b6;
-      document.getElementById('best-flappy').textContent = 'Рекорд: ' + b7;
-      document.getElementById('best-breaker').textContent = 'Рекорд: ' + b8;
-      document.getElementById('best-snake').textContent = 'Рекорд: ' + b9;
-      document.getElementById('total-best').textContent = b1 + b2 + b3 + b4 + b5 + b6 + b7 + b8 + b9;
-    }
+            [['best-2048', b1], ['best-blocks', b2], ['best-match', b3], ['best-doodle', b4], ['best-stack', b5], ['best-knife', b6], ['best-flappy', b7], ['best-breaker', b8], ['best-snake', b9], ['sub-2048', b1], ['sub-blocks', b2], ['sub-match', b3], ['sub-doodle', b4], ['sub-stack', b5], ['sub-knife', b6], ['sub-flappy', b7], ['sub-breaker', b8], ['sub-snake', b9]].forEach(([id, val]) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = val;
+      });
+      const tb = document.getElementById('total-best');
+      if (tb) tb.textContent = b1 + b2 + b3 + b4 + b5 + b6 + b7 + b8 + b9;
+
 
     function openScreen(name) {
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
