@@ -1144,25 +1144,51 @@ canvas {
         { name: myName, score: myScore, me: true }
       ].sort((a, b) => b.score - a.score);
       const medals = ['🥇', '🥈', '🥉'];
-      list.innerHTML = players.map((p, i) => `
-        <div class="lb-row ${p.me ? 'me' : ''}">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span style="width:24px;font-weight:900;text-align:center;">${medals[i] || (i + 1)}</span>
-            <span style="font-weight:800;">${p.name}</span>
-          </div>
-          <span style="font-weight:900;color:${p.me ? '#60a5fa' : '#fde047'};">🏆 ${p.score}</span>
-        </div>`).join('');
+            list.innerHTML = players.map((p, i) => '<div class="lb-row ' + (p.me ? 'me' : '') + '"><div style="display:flex;align-items:center;gap:10px;"><span style="width:24px;font-weight:900;text-align:center;">' + (medals[i] || (i + 1)) + '</span><span style="font-weight:800;">' + p.name + '</span></div><span style="font-weight:900;color:' + (p.me ? '#60a5fa' : '#fde047') + ';">🏆 ' + p.score + '</span></div>').join('');
     }
 
-    
+    function renderProfile() {
+      const u = window.Telegram?.WebApp?.initDataUnsafe?.user;
+      const nameEl = document.getElementById('prof-name');
+      const tagEl = document.getElementById('prof-tag');
+      const avaEl = document.getElementById('prof-avatar');
+      if (u) {
+        const full = u.first_name + (u.last_name ? ' ' + u.last_name : '');
+        if (nameEl) nameEl.textContent = full;
+        if (tagEl) tagEl.textContent = u.username ? '@' + u.username : 'ID: ' + u.id;
+        if (avaEl) avaEl.innerHTML = u.photo_url ? '<img src="' + u.photo_url + '">' : u.first_name.toUpperCase();
+      }
+      const c = localStorage.getItem('pixelplay_coins') === null ? 100 : Number(localStorage.getItem('pixelplay_coins'));
+      const pc = document.getElementById('prof-coins');
+      const ps = document.getElementById('prof-score');
+      if (pc) pc.textContent = c;
+      if (ps) ps.textContent = getMyTotalScore();
+      const today = new Date().toDateString();
+      if (localStorage.getItem('pixelplay_daily') === today) {
+        const sub = document.getElementById('daily-sub');
+        if (sub) sub.textContent = 'Бонус на сегодня уже получен ✓';
+      }
+    }
 
-    
-        const tg = window.Telegram?.WebApp;
-            /* === КОШЕЛЁК PIXELCOINS === */
+    function claimDailyBonus() {
+      const today = new Date().toDateString();
+      if (localStorage.getItem('pixelplay_daily') === today) return;
+      localStorage.setItem('pixelplay_daily', today);
+      let c = localStorage.getItem('pixelplay_coins') === null ? 100 : Number(localStorage.getItem('pixelplay_coins'));
+      c += 50;
+      localStorage.setItem('pixelplay_coins', c);
+      const topBal = document.getElementById('coin-balance');
+      if (topBal) topBal.textContent = c;
+      renderProfile();
+    }
+
+    const tg = window.Telegram?.WebApp;
+    /* === КОШЕЛЁК PIXELCOINS === */
     let pixelCoins = localStorage.getItem('pixelplay_coins') === null
       ? 100 : Number(localStorage.getItem('pixelplay_coins'));
 
     function updateCoinsUI() {
+
       localStorage.setItem('pixelplay_coins', pixelCoins);
       ['coin-balance', 'coin-balance-2048'].forEach(id => {
         const el = document.getElementById(id);
