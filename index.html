@@ -2960,7 +2960,7 @@ function renderProfile() {
       if (topBal) topBal.textContent = c;
       renderProfile();
     }
-          <script>
+          
     window.renderLeaderboard = async function() {
       const list = document.getElementById('leaderboard-list');
       if (!list) return;
@@ -2997,7 +2997,7 @@ function renderProfile() {
         }).join('');
       } catch (e) { list.innerHTML = '<div style="color:#f87171;padding:20px;">' + e.message + '</div>'; }
     };
-  </script>
+  
 
   </script>
 </body>
