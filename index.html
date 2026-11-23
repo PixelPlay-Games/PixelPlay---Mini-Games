@@ -3012,6 +3012,16 @@ function renderProfile() {
       try { window.Telegram?.WebApp?.HapticFeedback?.impactOccurred('light'); } catch (e) {}
     }
 
+    (function() {
+      const scr = document.getElementById('screen-snake');
+      if (!scr || document.getElementById('snake-dpad')) return;
+      const d = document.createElement('div');
+      d.id = 'snake-dpad';
+      d.style.cssText = 'display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(2,52px);gap:8px;justify-content:center;margin:8px auto 0;user-select:none;-webkit-user-select:none;';
+      const bs = 'background:rgba(163,230,53,0.18);border:1px solid rgba(163,230,53,0.5);border-radius:16px;color:#a3e635;font-size:22px;font-weight:900;display:flex;align-items:center;justify-content:center;cursor:pointer;';
+      d.innerHTML = '<div></div><button onpointerdown="snakeDir(\'ArrowUp\')" style="'+bs+'">▲</button><div></div><button onpointerdown="snakeDir(\'ArrowLeft\')" style="'+bs+'">◀</button><button onpointerdown="snakeDir(\'ArrowDown\')" style="'+bs+'">▼</button><button onpointerdown="snakeDir(\'ArrowRight\')" style="'+bs+'">▶</button>';
+      scr.appendChild(d);
+    })();
 
 
   </script>
