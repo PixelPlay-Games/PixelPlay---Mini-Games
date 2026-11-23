@@ -1602,6 +1602,8 @@ canvas {
       dPlayer.y += dPlayer.vy;
 
       dPlats.forEach(p => {
+                
+
         if (p.type === 'moving') {
           p.x += p.vx;
           if (p.x <= 0 || p.x + p.w >= dCanvas.width) p.vx *= -1;
@@ -1626,6 +1628,7 @@ canvas {
           localStorage.setItem('pixelplay_doodle_best', bestDoodle);
         }
         dPlats.forEach(p => p.y += diff);
+            (window.dStars || []).forEach(s => { s.y = (s.y + diff * 0.25) % dCanvas.height; });
       }
 
       dPlats = dPlats.filter(p => p.y < dCanvas.height);
@@ -1634,7 +1637,16 @@ canvas {
         dPlats.push(makeDoodlePlat(topY - dCanvas.height / 7));
       }
 
-      dCtx.clearRect(0, 0, dCanvas.width, dCanvas.height);
+            const bg = dCtx.createLinearGradient(0, 0, 0, dCanvas.height);
+      bg.addColorStop(0, '#090d1a'); bg.addColorStop(1, '#151932');
+      dCtx.fillStyle = bg; dCtx.fillRect(0, 0, dCanvas.width, dCanvas.height);
+      dCtx.strokeStyle = 'rgba(168, 85, 247, 0.05)'; dCtx.lineWidth = 1;
+      for (let x = 36; x < dCanvas.width; x += 36) { dCtx.beginPath(); dCtx.moveTo(x, 0); dCtx.lineTo(x, dCanvas.height); dCtx.stroke(); }
+      (window.dStars || []).forEach(s => {
+        dCtx.fillStyle = `rgba(255, 255, 255, ${s.a})`;
+        dCtx.beginPath(); dCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2); dCtx.fill();
+      });
+
       dPlats.forEach(p => {
         if (p.broken) return;
         dCtx.fillStyle = p.type === 'normal' ? '#10b981' : (p.type === 'moving' ? '#3b82f6' : '#f59e0b');
