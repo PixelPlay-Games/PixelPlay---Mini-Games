@@ -18,11 +18,17 @@
       border: 1px solid rgba(255,255,255,0.12); color: #fff; display: flex; align-items: center; justify-content: center; cursor: pointer;
     }
     .btn-icon:active { transform: scale(0.92); background: rgba(255,255,255,0.15); }
-    .game-title {
-      font-size: 24px; font-weight: 900;
-      background: linear-gradient(90deg, #34d399, #3b82f6, #a855f7);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+     .game-title {
+      font-size: 16px; font-weight: 900; letter-spacing: 1.5px;
+      padding: 6px 16px 6px 8px; border-radius: 16px;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+      color: #fff; text-transform: uppercase;
+      display: flex; align-items: center; gap: 10px;
     }
+
     .scores { width: 100%; max-width: 390px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin: 12px 0; }
     .score-box {
       background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
@@ -48,7 +54,8 @@
     .g-2 { background: linear-gradient(135deg, #10b981, #047857); box-shadow: 0 0 10px rgba(16,185,129,0.6); }
     .g-3 { background: linear-gradient(135deg, #f43f5e, #be123c); box-shadow: 0 0 10px rgba(244,63,94,0.6); border-radius: 50% 50% 4px 50%; transform: rotate(45deg) scale(0.86); }
     .g-4 { background: linear-gradient(135deg, #f59e0b, #b45309); box-shadow: 0 0 10px rgba(245,158,11,0.6); clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%); }
-    .g-5 { background: linear-gradient(135deg, #06b6d4, #0e7490); box-shadow: 0 0 10px rgba(6,182,212,0.6); border-radius: 14px
+       .g-5 { background: linear-gradient(135deg, #06b6d4, #0e7490); box-shadow: 0 0 10px rgba(6, 182, 212, 0.6); border-radius: 14px; }
+
     .overlay { position: fixed; inset: 0; background: rgba(7, 8, 15, 0.85); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; padding: 20px; z-index: 100; }
 .overlay.show { display: flex; }
 .over-card { width: 100%; max-width: 310px; background: linear-gradient(180deg, rgba(30, 32, 54, 0.96), rgba(16, 18, 32, 0.98)); border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 26px; padding: 24px 20px; text-align: center; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8); }
@@ -64,45 +71,86 @@
     @keyframes floatUp { 0% { opacity: 1; transform: translate(-50%, 0) scale(0.8); } 50% { transform: translate(-50%, -25px) scale(1.15); } 100% { opacity: 0; transform: translate(-50%, -55px) scale(1); } }
     .particle { position: fixed; width: 8px; height: 8px; border-radius: 3px; pointer-events: none; z-index: 400; animation: burst 0.6s ease-out forwards; }
     @keyframes burst { 0% { opacity: 1; transform: translate(0,0) scale(1); } 100% { opacity: 0; transform: translate(var(--dx), var(--dy)) scale(0.2); } }
+        .pixel-coin { /* стили иконки монеты */ }
+    .coin-pill { /* стили плашки баланса монет */ }
+    .boosters-bar { /* сетка панели бустеров */ }
+    .booster-btn { /* стиль кнопок бустеров, включая :active, .active, .no-funds и анимацию @keyframes noFunds */ }
+    .b-name, .b-cost { /* типографика названия и стоимости бустера */ }
+    .gem.targetable { /* подсветка выбранного кристалла */ }
+
   </style>
 </head>
 <body>
-  <div class="top-bar">
-    <button class="btn-icon" onclick="location.href='../index.html'"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg></button>
-    <div class="game-title">ТРИ В РЯД</div>
-    <button class="btn-icon" onclick="initMatch()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
+    <div class="top-bar">
+    <button class="btn-icon" onclick="location.href='../index.html'">←</button>
+    <div class="game-title"><span style="display:inline-block;width:12px;height:12px;background:#34d399;transform:rotate(45deg);border-radius:3px;"></span><span>ТРИ В РЯД</span></div>
+    <button class="btn-icon" onclick="initMatch()">↻</button>
   </div>
   <div class="scores">
     <div class="score-box"><div class="score-label">Счет</div><div class="score-val" id="smatch">0</div></div>
     <div class="score-box"><div class="score-label">Ходы</div><div class="score-val" id="mmatch" style="color:#34d399;">30</div></div>
     <div class="score-box best"><div class="score-label">Рекорд</div><div class="score-val" id="bmatch">0</div></div>
   </div>
-  <div class="board-wrap" id="wrap-match">
-    <div class="grid-match" id="grid-match">
-      <div class="overlay" id="over-match">
 
-    </<div class="overlay" id="over-match" style="display:none;">
-
-
-  <div class="over-card">
-    <div class="over-badge">ИГРА ОКОНЧЕНА</div>
-    <div class="over-title">Ходы вышли!</div>
-    <div class="over-score-box">
-      <div class="over-score-lbl">ТВОЙ СЧЕТ</div>
-      <div class="over-score-num" id="fmatch">0</div>
+    <div class="board-wrap" id="wrap-match">
+    <div class="grid-match" id="grid-match"></div>
+    <div class="overlay" id="over-match">
+      <div class="over-card">
+        <div class="over-badge">ИГРА ОКОНЧЕНА</div>
+        <div class="over-title">Ходы вышли!</div>
+        <div class="over-score-box"><div class="over-score-lbl">ТВОЙ СЧЕТ</div><div class="over-score-num" id="fmatch">0</div></div>
+        <button class="btn-restart" onclick="initMatch()">Играть снова</button>
+        <button class="btn-home-sub" onclick="location.href='../index.html'">В меню игр</button>
+      </div>
     </div>
-    <button class="btn-restart" onclick="initMatch()">Играть снова</button>
-    <button class="btn-home-sub" onclick="location.href='../index.html'">В меню игр</button>
   </div>
-</div>
+  <div id="hint-match" style="font-size:12px;color:#93c5fd;font-weight:700;min-height:16px;">Свайпай или нажимай соседние кристаллы</div>
+  <div class="boosters-bar">
+    <button class="booster-btn" id="btn-moves" onclick="useMatchBooster('moves')"><span class="b-name">+5 ходов</span><span class="b-cost"><span class="pixel-coin"></span>30</span></button>
+    <button class="booster-btn" id="btn-bomb" onclick="useMatchBooster('bomb')"><span class="b-name">Бомба 3×3</span><span class="b-cost"><span class="pixel-coin"></span>50</span></button>
+    <button class="booster-btn" id="btn-shuffle" onclick="useMatchBooster('shuffle')"><span class="b-name">Мешать</span><span class="b-cost"><span class="pixel-coin"></span>40</span></button>
+  </div>
 
+  <div class="coin-pill">
+    <span class="pixel-coin"></span>
+    <span id="coin-balance-match">100</span>
   </div>
-  <div style="font-size:12px;color:#6b7280;">Свайпай или нажимай соседние кристаллы</div>
+
   <script>
     const GEM_HEX = ['#a855f7', '#3b82f6', '#10b981', '#f43f5e', '#f59e0b', '#06b6d4'];
     let boardMatch = [], scoreMatch = 0, movesMatch = 30, selGem = null, busyMatch = false;
     let bestMatch = Number(localStorage.getItem('pixelplay_match_best')) || 0;
     document.getElementById('bmatch').textContent = bestMatch;
+    let matchCoins = localStorage.getItem('pixelplay_coins') === null ? 100 : Number(localStorage.getItem('pixelplay_coins'));
+    let activeMatchBooster = null;
+    const MATCH_COST = { moves: 30, bomb: 50, shuffle: 40 };
+
+    function updateMatchCoinsUI() {
+      localStorage.setItem('pixelplay_coins', matchCoins);
+      const el = document.getElementById('coin-balance-match');
+      if (el) el.textContent = matchCoins;
+    }
+    updateMatchCoinsUI();
+
+    function useMatchBooster(type) {
+      if (busyMatch || movesMatch <= 0) return;
+      if (activeMatchBooster === type) { activeMatchBooster = null; renderMatch(); return; }
+      const btn = document.getElementById('btn-' + type);
+      if (matchCoins < MATCH_COST[type]) {
+        btn.classList.remove('no-funds'); void btn.offsetWidth; btn.classList.add('no-funds');
+        return;
+      }
+      if (type === 'moves') {
+        matchCoins -= 30; updateMatchCoinsUI(); movesMatch += 5;
+        document.getElementById('mmatch').textContent = movesMatch; return;
+      }
+      if (type === 'shuffle') {
+        matchCoins -= 40; updateMatchCoinsUI();
+        for (let r = 0; r < 7; r++) for (let c = 0; c < 7; c++) boardMatch[r][c] = Math.floor(Math.random() * 6);
+        renderMatch(); return;
+      }
+      activeMatchBooster = 'bomb'; renderMatch();
+    }
 
     function initMatch() {
       boardMatch = [];
@@ -157,6 +205,17 @@
 
     function tapGem(r, c) {
       if (busyMatch || movesMatch <= 0) return;
+            if (activeMatchBooster === 'bomb') {
+        matchCoins -= 50; updateMatchCoinsUI(); activeMatchBooster = null;
+        for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+          let nr = r + dr, nc = c + dc;
+          if (nr >= 0 && nr < 7 && nc >= 0 && nc < 7) { boardMatch[nr][nc] = null; scoreMatch += 30; }
+        }
+        document.getElementById('smatch').textContent = scoreMatch;
+        renderMatch(); setTimeout(() => { dropGems(); renderMatch(); }, 200);
+        return;
+      }
+
       if (!selGem) { selGem = { r, c }; renderMatch(); return; }
       if (selGem.r === r && selGem.c === c) { selGem = null; renderMatch(); return; }
       if (Math.abs(selGem.r - r) + Math.abs(selGem.c - c) === 1) {
@@ -213,6 +272,9 @@
       }
       busyMatch = false;
       if (movesMatch <= 0) {
+                const reward = scoreMatch > 0 ? Math.max(5, Math.floor(scoreMatch / 15)) : 0;
+        if (reward > 0) { matchCoins += reward; updateMatchCoinsUI(); }
+
         document.getElementById('fmatch').textContent = scoreMatch;
         document.getElementById('over-match').classList.add('show');
         document.getElementById('over-match').style.display = 'flex';
