@@ -1131,23 +1131,67 @@ canvas {
       return tb ? (Number(tb.textContent) || 0) : 0;
     }
 
-    function renderLeaderboard() {
+        const SB_URL = 'https://' + 'gaeurppcybplcwvbertu.supabase.co';
+    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdhZXVycHBjeWJwbGN3dmJlcnR1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU0NDc3MDUsImV4cCI6MjExMTAyMzcwNX0.tF5TLX0XfKBgu62QtljBrbJ3pIQdqLth0gXEsGJcRbY';
+
+    function getMyTotalScore() {
+      const tb = document.getElementById('total-best');
+      return tb ? (Number(tb.textContent) || 0) : 0;
+    }
+
+    async function syncPlayerToCloud() {
+      const u = window.Telegram?.WebApp?.initDataUnsafe?.user;
+      if (!u || !u.id) return;
+      const fullName = (u.first_name + (u.last_name ? ' ' + u.last_name : '')).trim();
+      const payload = {
+        id: String(u.id),
+        name: fullName || ('Player #' + u.id),
+        username: u.username ? '@' + u.username : '',
+        photo_url: u.photo_url || '',
+        score: getMyTotalScore(),
+        updated_at: new Date().toISOString()
+      };
+      try {
+        await fetch(SB_URL + '/rest/v1/players', {
+          method: 'POST',
+          headers: {
+            'apikey': SB_KEY,
+            'Authorization': 'Bearer ' + SB_KEY,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify(payload)
+        });
+      } catch (e) {}
+    }
+
+    async function renderLeaderboard() {
       const list = document.getElementById('leaderboard-list');
       if (!list) return;
-      const u = window.Telegram?.WebApp?.initDataUnsafe?.user;
-      const myName = u ? (u.first_name + (u.last_name ? ' ' + u.last_name : '')) : 'Ты (Игрок)';
-      const myScore = getMyTotalScore();
-      const players = [
-        { name: 'AlexPro', score: 18450 },
-        { name: 'CyberFox', score: 14200 },
-        { name: 'Maxon_GG', score: 11300 },
-        { name: 'KiraNeon', score: 8900 },
-        { name: 'Vortex77', score: 6150 },
-        { name: 'Denchik', score: 3400 },
-        { name: myName, score: myScore, me: true }
-      ].sort((a, b) => b.score - a.score);
-      const medals = ['🥇', '🥈', '🥉'];
-            list.innerHTML = players.map((p, i) => '<div class="lb-row ' + (p.me ? 'me' : '') + '"><div style="display:flex;align-items:center;gap:10px;"><span style="width:24px;font-weight:900;text-align:center;">' + (medals[i] || (i + 1)) + '</span><span style="font-weight:800;">' + p.name + '</span></div><span style="font-weight:900;color:' + (p.me ? '#60a5fa' : '#fde047') + ';">🏆 ' + p.score + '</span></div>').join('');
+      list.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:20px;font-weight:700;">Загрузка рейтинга...</div>';
+      await syncPlayerToCloud();
+      const myId = String(window.Telegram?.WebApp?.initDataUnsafe?.user?.id || '');
+      try {
+        const res = await fetch(SB_URL + '/rest/v1/players?select=*&order=score.desc&limit=30', {
+          headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+        });
+        const players = await res.json();
+        if (!Array.isArray(players) || players.length === 0) {
+          list.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:20px;">Пока нет игроков в рейтинге</div>';
+          return;
+        }
+        const medals = ['🥇', '🥈', '🥉'];
+        list.innerHTML = players.map((p, i) => {
+          const isMe = myId && String(p.id) === myId;
+          const ava = p.photo_url
+            ? '<img src="' + p.photo_url + '" style="width:34px;height:34px;border-radius:12px;object-fit:cover;">'
+            : '<div style="width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:900;font-size:14px;">' + (p.name ? p.name.toUpperCase() : 'P') + '</div>';
+          const sub = p.username ? '<div style="font-size:11px;color:#94a3b8;">' + p.username + '</div>' : '';
+          return '<div class="lb-row ' + (isMe ? 'me' : '') + '"><div style="display:flex;align-items:center;gap:10px;"><span style="width:24px;font-weight:900;text-align:center;">' + (medals[i] || (i + 1)) + '</span>' + ava + '<div><div style="font-weight:800;">' + p.name + '</div>' + sub + '</div></div><span style="font-weight:900;color:' + (isMe ? '#60a5fa' : '#fde047') + ';">🏆 ' + (p.score || 0) + '</span></div>';
+        }).join('');
+      } catch (e) {
+        list.innerHTML = '<div style="text-align:center;color:#f87171;padding:20px;">Ошибка загрузки рейтинга</div>';
+      }
     }
 
     function renderProfile() {
@@ -1156,10 +1200,11 @@ canvas {
       const tagEl = document.getElementById('prof-tag');
       const avaEl = document.getElementById('prof-avatar');
       if (u) {
-        const full = u.first_name + (u.last_name ? ' ' + u.last_name : '');
+        const full = (u.first_name + (u.last_name ? ' ' + u.last_name : '')).trim();
         if (nameEl) nameEl.textContent = full;
         if (tagEl) tagEl.textContent = u.username ? '@' + u.username : 'ID: ' + u.id;
         if (avaEl) avaEl.innerHTML = u.photo_url ? '<img src="' + u.photo_url + '">' : u.first_name.toUpperCase();
+        syncPlayerToCloud();
       }
       const c = localStorage.getItem('pixelplay_coins') === null ? 100 : Number(localStorage.getItem('pixelplay_coins'));
       const pc = document.getElementById('prof-coins');
@@ -1172,6 +1217,21 @@ canvas {
         if (sub) sub.textContent = 'Бонус на сегодня уже получен ✓';
       }
     }
+
+    function claimDailyBonus() {
+      const today = new Date().toDateString();
+      if (localStorage.getItem('pixelplay_daily') === today) return;
+      localStorage.setItem('pixelplay_daily', today);
+      let c = localStorage.getItem('pixelplay_coins') === null ? 100 : Number(localStorage.getItem('pixelplay_coins'));
+      c += 50;
+      localStorage.setItem('pixelplay_coins', c);
+      const topBal = document.getElementById('coin-balance');
+      if (topBal) topBal.textContent = c;
+      renderProfile();
+    }
+
+    setTimeout(syncPlayerToCloud, 1500);
+
 
     function claimDailyBonus() {
       const today = new Date().toDateString();
