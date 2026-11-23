@@ -1199,7 +1199,8 @@ canvas {
           return '<div class="lb-row ' + (isMe ? 'me' : '') + '"><div style="display:flex;align-items:center;gap:10px;"><span style="width:24px;font-weight:900;text-align:center;">' + (medals[i] || (i + 1)) + '</span>' + ava + '<div><div style="font-weight:800;">' + p.name + '</div>' + sub + '</div></div><span style="font-weight:900;color:' + (isMe ? '#60a5fa' : '#fde047') + ';">🏆 ' + (p.score || 0) + '</span></div>';
         }).join('');
       } catch (e) {
-        list.innerHTML = '<div style="text-align:center;color:#f87171;padding:20px;">Ошибка загрузки рейтинга</div>';
+        list.innerHTML = '<div style="text-align:center;color:#f87171;padding:20px;font-size:12px;word-break:break-all;">' + (window._sbErr || 'OK_EMPTY: ' + SB_URL) + '</div>';
+
       }
     }
 
