@@ -495,9 +495,11 @@ canvas {
   font-size: 13px; font-weight: 800; color: #fde047;
 }
 
-/* Аккуратные зазоры по центру без растягивания */
+
+/* Аккуратные зазоры с прижатием к верху */
 .screen:not(#screen-home) {
-  justify-content: center !important;
+  justify-content: flex-start !important;
+  padding-top: 8px !important;
   gap: 12px !important;
 }
 .top-bar, .scores, .board-wrap {
@@ -509,6 +511,7 @@ canvas {
 .game-title { font-size: 16px !important; padding: 10px 18px !important; }
 .score-box { padding: 12px 14px !important; border-radius: 16px !important; }
 .score-val { font-size: 26px !important; }
+
 
 
 
