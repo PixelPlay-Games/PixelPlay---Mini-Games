@@ -1139,15 +1139,21 @@ canvas {
       return tb ? (Number(tb.textContent) || 0) : 0;
     }
 
-    async function syncPlayerToCloud() {
+        async function syncPlayerToCloud() {
       const u = window.Telegram?.WebApp?.initDataUnsafe?.user;
-      if (!u || !u.id) return;
-      const fullName = (u.first_name + (u.last_name ? ' ' + u.last_name : '')).trim();
+      let pid = u?.id ? String(u.id) : localStorage.getItem('pixelplay_uid');
+      if (!pid) {
+        pid = 'u_' + Math.random().toString(36).slice(2, 10);
+        localStorage.setItem('pixelplay_uid', pid);
+      }
+      const customName = localStorage.getItem('pixelplay_custom_name');
+      const tgName = u ? (u.first_name + (u.last_name ? ' ' + u.last_name : '')).trim() : '';
+      const fullName = customName || tgName || ('Игрок #' + pid.slice(-4).toUpperCase());
       const payload = {
-        id: String(u.id),
-        name: fullName || ('Player #' + u.id),
-        username: u.username ? '@' + u.username : '',
-        photo_url: u.photo_url || '',
+        id: pid,
+        name: fullName,
+        username: u?.username ? '@' + u.username : '',
+        photo_url: u?.photo_url || '',
         score: getMyTotalScore(),
         updated_at: new Date().toISOString()
       };
@@ -1164,6 +1170,7 @@ canvas {
         });
       } catch (e) {}
     }
+
 
     async function renderLeaderboard() {
       const list = document.getElementById('leaderboard-list');
