@@ -2960,6 +2960,45 @@ function renderProfile() {
       if (topBal) topBal.textContent = c;
       renderProfile();
     }
+          <script>
+    window.renderLeaderboard = async function() {
+      const list = document.getElementById('leaderboard-list');
+      if (!list) return;
+      list.innerHTML = '<div style="text-align:center;color:#94a3b8;padding:20px;">Загрузка...</div>';
+      const u = window.Telegram?.WebApp?.initDataUnsafe?.user;
+      let pid = u?.id ? String(u.id) : localStorage.getItem('pixelplay_uid');
+      if (!pid) { pid = 'u_' + Math.random().toString(36).slice(2, 10); localStorage.setItem('pixelplay_uid', pid); }
+      const fullName = u ? (u.first_name + (u.last_name ? ' ' + u.last_name : '')).trim() : ('Игрок #' + pid.slice(-4).toUpperCase());
+      const score = Number(document.getElementById('total-best')?.textContent) || 0;
+      let err = '';
+      try {
+        const pr = await fetch(SB_URL + '/rest/v1/players', {
+          method: 'POST',
+          headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'Prefer': 'resolution=merge-duplicates' },
+          body: JSON.stringify({ id: pid, name: fullName, username: u?.username ? '@' + u.username : '', photo_url: u?.photo_url || '', score: score, updated_at: new Date().toISOString() })
+        });
+        if (!pr.ok) err = 'POST ' + pr.status + ': ' + await pr.text();
+      } catch (e) { err = 'NET: ' + e.message; }
+
+      try {
+        const res = await fetch(SB_URL + '/rest/v1/players?select=*&order=score.desc&limit=30', {
+          headers: { 'apikey': SB_KEY, 'Authorization': 'Bearer ' + SB_KEY }
+        });
+        const players = await res.json();
+        if (!Array.isArray(players) || players.length === 0) {
+          list.innerHTML = '<div style="text-align:center;color:#f87171;padding:20px;font-size:12px;word-break:break-all;">' + (err || 'GET ' + res.status + ': ' + JSON.stringify(players)) + '</div>';
+          return;
+        }
+        const medals = ['🥇', '🥈', '🥉'];
+        list.innerHTML = players.map((p, i) => {
+          const isMe = String(p.id) === pid;
+          const ava = p.photo_url ? '<img src="' + p.photo_url + '" style="width:34px;height:34px;border-radius:12px;object-fit:cover;">' : '<div style="width:34px;height:34px;border-radius:12px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);display:flex;align-items:center;justify-content:center;font-weight:900;">' + (p.name ? p.name[0].toUpperCase() : 'P') + '</div>';
+          return '<div class="lb-row ' + (isMe ? 'me' : '') + '"><div style="display:flex;align-items:center;gap:10px;"><span style="width:24px;font-weight:900;text-align:center;">' + (medals[i] || (i + 1)) + '</span>' + ava + '<div><div style="font-weight:800;">' + p.name + '</div>' + (p.username ? '<div style="font-size:11px;color:#94a3b8;">' + p.username + '</div>' : '') + '</div></div><span style="font-weight:900;color:' + (isMe ? '#60a5fa' : '#fde047') + ';">🏆 ' + (p.score || 0) + '</span></div>';
+        }).join('');
+      } catch (e) { list.innerHTML = '<div style="color:#f87171;padding:20px;">' + e.message + '</div>'; }
+    };
+  </script>
+
   </script>
 </body>
 </html>
