@@ -1158,7 +1158,7 @@ canvas {
         updated_at: new Date().toISOString()
       };
       try {
-        await fetch(SB_URL + '/rest/v1/players', {
+                const r = await fetch(SB_URL + '/rest/v1/players', {
           method: 'POST',
           headers: {
             'apikey': SB_KEY,
@@ -1168,7 +1168,9 @@ canvas {
           },
           body: JSON.stringify(payload)
         });
-      } catch (e) {}
+        if (!r.ok) window._sbErr = r.status + ': ' + await r.text();
+      } catch (e) { window._sbErr = e.message; }
+
     }
 
 
