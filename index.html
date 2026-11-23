@@ -494,11 +494,11 @@ canvas {
   padding: 5px 12px; border-radius: 12px; margin-top: 8px;
   font-size: 13px; font-weight: 800; color: #fde047;
 }
-/* Жёстко прижимаем весь игровой блок к верху */
-body { padding-top: 0 !important; }
-.screen { justify-content: flex-start !important; padding-top: 6px !important; }
-.top-bar { margin-top: 0 !important; margin-bottom: 8px !important; }
-.scores { margin-bottom: 8px !important; }
+/* Поджимаем весь игровой блок к верху */
+body, .screen { padding-top: 4px !important; }
+.screen { justify-content: flex-start !important; gap: 8px !important; }
+.top-bar, .scores, .board-wrap { margin-top: 0 !important; margin-bottom: 0 !important; }
+
 
 
   </style>
