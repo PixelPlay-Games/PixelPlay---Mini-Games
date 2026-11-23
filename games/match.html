@@ -77,6 +77,12 @@
     .booster-btn { /* стиль кнопок бустеров, включая :active, .active, .no-funds и анимацию @keyframes noFunds */ }
     .b-name, .b-cost { /* типографика названия и стоимости бустера */ }
     .gem.targetable { /* подсветка выбранного кристалла */ }
+.pixel-coin{display:inline-flex;width:16px;height:16px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#fef08a,#f59e0b 70%,#b45309);border:1.5px solid #fde047;box-shadow:0 0 8px rgba(250,204,21,.6)}
+.coin-pill{background:rgba(250,204,21,.12);padding:7px 14px;border-radius:20px;font-size:13px;font-weight:800;color:#fde047;display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(250,204,21,.4)}
+.boosters-bar{width:100%;max-width:380px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.booster-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:16px;padding:10px 6px;color:#fff;display:flex;flex-direction:column;align-items:center;gap:5px;cursor:pointer;outline:none}
+.booster-btn.active{background:rgba(244,63,94,.22);border-color:#f43f5e}
+.b-name{font-size:11px;font-weight:800}.b-cost{display:flex;align-items:center;gap:4px;font-size:11px;font-weight:800;color:#fde047}.b-cost .pixel-coin{width:13px;height:13px}
 
   </style>
 </head>
@@ -84,7 +90,8 @@
     <div class="top-bar">
     <button class="btn-icon" onclick="location.href='../index.html'">←</button>
     <div class="game-title"><span style="display:inline-block;width:12px;height:12px;background:#34d399;transform:rotate(45deg);border-radius:3px;"></span><span>ТРИ В РЯД</span></div>
-    <button class="btn-icon" onclick="initMatch()">↻</button>
+<button class="btn-icon" style="flex-shrink:0" onclick="initMatch()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg></button>
+
   </div>
   <div class="scores">
     <div class="score-box"><div class="score-label">Счет</div><div class="score-val" id="smatch">0</div></div>
