@@ -499,8 +499,16 @@ body, .screen { padding-top: 4px !important; }
 .screen { justify-content: flex-start !important; gap: 8px !important; }
 .top-bar, .scores, .board-wrap { margin-top: 0 !important; margin-bottom: 0 !important; }
 
-/* Физически поднимаем весь игровой блок вверх */
-.screen > * { transform: translateY(-6px); }
+/* Убираем обрезку сверху и компактно поджимаем отступы */
+.screen {
+  overflow: visible !important;
+  justify-content: flex-start !important;
+  padding-top: 6px !important;
+  gap: 8px !important;
+}
+.screen > * { transform: none !important; }
+.top-bar, .scores, .board-wrap { margin: 0 !important; }
+
 
 
 
