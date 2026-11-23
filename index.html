@@ -523,6 +523,41 @@ canvas {
 .card-teal   { background: linear-gradient(135deg, #14b8a6, #0f766e) !important; }
 .card-lime   { background: linear-gradient(135deg, #84cc16, #4d7c0f) !important; }
 
+/* Парящая нижняя панель .nav и экраны Топ / Профиль */
+#screen-home { padding-bottom: 96px !important; }
+.nav {
+  position: fixed !important; bottom: 14px !important; left: 50% !important; transform: translateX(-50%) !important;
+  width: 92vw !important; max-width: 400px !important; height: 64px !important; padding: 6px !important;
+  background: rgba(16, 18, 30, 0.96) !important; border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  border-radius: 24px !important; box-shadow: 0 10px 28px rgba(0, 0, 0, 0.7) !important;
+  display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 6px !important; z-index: 200 !important;
+}
+.nav-item {
+  border-radius: 18px !important; display: flex !important; flex-direction: column !important;
+  align-items: center !important; justify-content: center !important; gap: 3px !important;
+  color: #94a3b8 !important; font-size: 11px !important; font-weight: 800 !important; text-decoration: none !important;
+}
+.nav-item.active {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3)) !important;
+  border: 1px solid rgba(96, 165, 250, 0.45) !important; color: #fff !important;
+}
+.tab-view { display: none; flex-direction: column; gap: 12px; width: 100%; }
+.tab-view.active { display: flex; }
+.lb-row {
+  display: flex; align-items: center; justify-content: space-between; padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.09); border-radius: 18px;
+}
+.lb-row.me { background: rgba(59, 130, 246, 0.18); border-color: rgba(96, 165, 250, 0.5); }
+.prof-card {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.18), rgba(139, 92, 246, 0.18));
+  border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 22px; padding: 18px;
+  display: flex; align-items: center; gap: 14px;
+}
+.prof-ava {
+  width: 56px; height: 56px; border-radius: 18px; background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+  display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 900; overflow: hidden; flex-shrink: 0;
+}
+.prof-ava img { width: 100%; height: 100%; object-fit: cover; }
 
   </style>
 </head>
@@ -609,11 +644,45 @@ canvas {
   <div class="card card-pink" onclick="openScreen('knife')">
         <div class="card-top">
           <div class="icon-box">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="m14.5 17.5-11-11V3h3.5l11 11"/><path d="m13 19 6-6"/><path d="m16 16 4 4"/><path d="m19 21 2-2"/></svg>
-          </div>
-          <div class="badge" style="color:#f9a8d4;">Точность</div>
+            <div id="tab-top" class="tab-view">
+      <div class="section-title">Таблица лидеров</div>
+      <div id="leaderboard-list" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+
+    <div id="tab-profile" class="tab-view">
+      <div class="section-title">Профиль игрока</div>
+      <div class="prof-card">
+        <div class="prof-ava" id="prof-avatar">P</div>
+        <div>
+          <div id="prof-name" style="font-size:18px;font-weight:900;">Игрок</div>
+          <div id="prof-tag" style="font-size:12px;color:#94a3b8;margin-top:2px;">PixelPlay Member</div>
         </div>
-        <div><div class="card-title">Knife Hit</div><div class="card-sub" id="best-knife">Рекорд: 0</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="lb-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+          <span style="font-size:11px;color:#94a3b8;font-weight:700;">БАЛАНС МОНЕТ</span>
+          <span style="font-size:20px;font-weight:900;color:#fde047;"><span class="pixel-coin"></span> <span id="prof-coins">100</span></span>
+        </div>
+        <div class="lb-row" style="flex-direction:column;align-items:flex-start;gap:4px;">
+          <span style="font-size:11px;color:#94a3b8;font-weight:700;">ОБЩИЙ РЕКОРД</span>
+          <span style="font-size:20px;font-weight:900;color:#60a5fa;">🏆 <span id="prof-score">0</span></span>
+        </div>
+      </div>
+      <div class="lb-row" onclick="claimDailyBonus()" id="daily-btn" style="cursor:pointer;background:linear-gradient(135deg,rgba(245,158,11,0.2),rgba(234,88,12,0.2));border-color:rgba(251,191,36,0.45);">
+        <div>
+          <div style="font-size:14px;font-weight:800;color:#fde047;">🎁 Ежедневный бонус</div>
+          <div id="daily-sub" style="font-size:11px;color:#cbd5e1;">Нажми, чтобы забрать +50 PixelCoins</div>
+        </div>
+        <span style="font-weight:900;color:#fde047;">+50</span>
+      </div>
+    </div>
+
+    <div class="nav">
+      <a href="#" class="nav-item active" onclick="switchHomeTab('games', this); return false;"><span>🎮</span><span>Игры</span></a>
+      <a href="#" class="nav-item" onclick="switchHomeTab('top', this); return false;"><span>🏆</span><span>Топ</span></a>
+      <a href="#" class="nav-item" onclick="switchHomeTab('profile', this); return false;"><span>👤</span><span>Профиль</span></a>
+    </div>
+
       </div>
       <div class="card card-indigo" onclick="openScreen('flappy')">
         <div class="card-top">
@@ -1039,6 +1108,53 @@ canvas {
     </div>
     <div style="font-size:12px;color:#6b7280;">Свайпай в любую сторону для поворота</div>
   </div>
+    function switchHomeTab(tab, el) {
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      if (el) el.classList.add('active');
+      const sec = document.querySelector('#screen-home .section-title');
+      const grid = document.querySelector('#screen-home .grid-menu');
+      const topV = document.getElementById('tab-top');
+      const profV = document.getElementById('tab-profile');
+      if (sec) sec.style.display = tab === 'games' ? 'block' : 'none';
+      if (grid) grid.style.display = tab === 'games' ? 'grid' : 'none';
+      if (topV) topV.classList.toggle('active', tab === 'top');
+      if (profV) profV.classList.toggle('active', tab === 'profile');
+      if (tab === 'top') renderLeaderboard();
+      if (tab === 'profile') renderProfile();
+    }
+
+    function getMyTotalScore() {
+      const tb = document.getElementById('total-best');
+      return tb ? (Number(tb.textContent) || 0) : 0;
+    }
+
+    function renderLeaderboard() {
+      const list = document.getElementById('leaderboard-list');
+      if (!list) return;
+      const u = window.Telegram?.WebApp?.initDataUnsafe?.user;
+      const myName = u ? (u.first_name + (u.last_name ? ' ' + u.last_name : '')) : 'Ты (Игрок)';
+      const myScore = getMyTotalScore();
+      const players = [
+        { name: 'AlexPro', score: 18450 },
+        { name: 'CyberFox', score: 14200 },
+        { name: 'Maxon_GG', score: 11300 },
+        { name: 'KiraNeon', score: 8900 },
+        { name: 'Vortex77', score: 6150 },
+        { name: 'Denchik', score: 3400 },
+        { name: myName, score: myScore, me: true }
+      ].sort((a, b) => b.score - a.score);
+      const medals = ['🥇', '🥈', '🥉'];
+      list.innerHTML = players.map((p, i) => `
+        <div class="lb-row ${p.me ? 'me' : ''}">
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span style="width:24px;font-weight:900;text-align:center;">${medals[i] || (i + 1)}</span>
+            <span style="font-weight:800;">${p.name}</span>
+          </div>
+          <span style="font-weight:900;color:${p.me ? '#60a5fa' : '#fde047'};">🏆 ${p.score}</span>
+        </div>`).join('');
+    }
+
+    
 
     <script>
         const tg = window.Telegram?.WebApp;
@@ -2714,7 +2830,40 @@ canvas {
         snakeAnim = requestAnimationFrame(loopSnake);
       }
     }
+function renderProfile() {
+      const u = window.Telegram?.WebApp?.initDataUnsafe?.user;
+      const nameEl = document.getElementById('prof-name');
+      const tagEl = document.getElementById('prof-tag');
+      const avaEl = document.getElementById('prof-avatar');
+      if (u) {
+        const full = u.first_name + (u.last_name ? ' ' + u.last_name : '');
+        if (nameEl) nameEl.textContent = full;
+        if (tagEl) tagEl.textContent = u.username ? '@' + u.username : 'ID: ' + u.id;
+        if (avaEl) avaEl.innerHTML = u.photo_url ? `<img src="${u.photo_url}">` : u.first_name[0].toUpperCase();
+      }
+      const c = localStorage.getItem('pixelplay_coins') === null ? 100 : Number(localStorage.getItem('pixelplay_coins'));
+      const pc = document.getElementById('prof-coins');
+      const ps = document.getElementById('prof-score');
+      if (pc) pc.textContent = c;
+      if (ps) ps.textContent = getMyTotalScore();
+      const today = new Date().toDateString();
+      if (localStorage.getItem('pixelplay_daily') === today) {
+        const sub = document.getElementById('daily-sub');
+        if (sub) sub.textContent = 'Бонус на сегодня уже получен ✓';
+      }
+    }
 
+    function claimDailyBonus() {
+      const today = new Date().toDateString();
+      if (localStorage.getItem('pixelplay_daily') === today) return;
+      localStorage.setItem('pixelplay_daily', today);
+      let c = localStorage.getItem('pixelplay_coins') === null ? 100 : Number(localStorage.getItem('pixelplay_coins'));
+      c += 50;
+      localStorage.setItem('pixelplay_coins', c);
+      const topBal = document.getElementById('coin-balance');
+      if (topBal) topBal.textContent = c;
+      renderProfile();
+    }
   </script>
 </body>
 </html>
